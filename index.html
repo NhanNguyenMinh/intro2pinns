@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Intro to PINNs for Mechanics: dự án nghiên cứu sinh viên về nghiệm giải tích, FEM và physics-informed neural networks cho bài toán dầm.">
+  <meta name="theme-color" content="#102a3a">
+  <title>Intro to PINNs for Mechanics · Dự án nghiên cứu sinh viên</title>
+  <style>
+    :root{--ink:#102a3a;--muted:#526473;--teal:#087e83;--light:#e7f4f2;--gold:#e9ae57;--paper:#f7f8f6;--line:#d9e2e4;--white:#fff;--shadow:0 18px 50px rgba(16,42,58,.08)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}a{color:#086b72}a:hover{text-decoration-thickness:2px}button{font:inherit}button:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:4px}::selection{background:#b6e5df}
+    .wrap{width:min(1120px,calc(100% - 40px));margin-inline:auto}.topbar{background:var(--ink);color:#fff}.topbar .wrap{min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{font-weight:800;letter-spacing:.02em;color:#fff;text-decoration:none}.brand span{color:#83d6ce}.nav{display:flex;flex-wrap:wrap;gap:6px 21px}.nav a{color:#dcebed;text-decoration:none;font-size:.9rem}.nav a:hover{color:#fff;text-decoration:underline}
+    .hero{position:relative;overflow:hidden;background:radial-gradient(circle at 85% 20%,#1a6971 0,transparent 38%),linear-gradient(135deg,#102a3a 0%,#173e4d 100%);color:#fff}.hero:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:32px 32px;mask-image:linear-gradient(90deg,transparent 35%,#000)}.hero .wrap{position:relative;display:grid;grid-template-columns:1.25fr .75fr;gap:45px;align-items:center;padding:86px 0 92px}.eyebrow{text-transform:uppercase;letter-spacing:.15em;font-size:.73rem;font-weight:800;color:#91ddd4;margin:0 0 18px}.hero h1{font-size:clamp(2.3rem,5vw,4.25rem);line-height:1.1;letter-spacing:-.045em;margin:0 0 22px;max-width:760px}.hero h1 em{font-style:normal;color:#9fe1d9}.hero p{font-size:1.12rem;color:#d8e7e9;max-width:660px;margin:0 0 28px}.actions{display:flex;flex-wrap:wrap;gap:12px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:45px;padding:10px 17px;border-radius:10px;font-size:.92rem;font-weight:750;text-decoration:none;cursor:pointer;border:1px solid transparent;transition:transform .15s,background .15s}.btn:hover{transform:translateY(-2px)}.btn-primary{background:var(--gold);color:#173142}.btn-outline{border-color:#81a7ae;color:#fff;background:transparent}.btn-small{min-height:38px;padding:7px 13px}.hero-visual{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:25px;box-shadow:var(--shadow)}.hero-visual svg{display:block;width:100%;height:auto}.hero-visual p{font-size:.86rem;margin:10px 0 0;color:#d6e7e8}.meta{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}.meta span{padding:5px 10px;border:1px solid #6d9ba1;border-radius:50px;color:#d8e7e9;font-size:.8rem}
+    main section{padding:72px 0;scroll-margin-top:20px}main section:nth-child(even){background:#eef3f2}.section-kicker{font-size:.73rem;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:850;margin:0 0 9px}.section-head{display:flex;align-items:end;justify-content:space-between;gap:25px;margin-bottom:28px}.section-head h2{font-size:clamp(1.8rem,3.2vw,2.65rem);letter-spacing:-.035em;line-height:1.17;margin:0}.lead{font-size:1.06rem;max-width:720px;color:var(--muted);margin:13px 0 0}.grid{display:grid;gap:17px}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:25px;box-shadow:0 5px 18px rgba(16,42,58,.025)}.card h3{margin:0 0 9px;font-size:1.11rem}.card p{margin:0;color:var(--muted)}.card ul{padding-left:19px;margin:11px 0 0;color:var(--muted)}.number{font-size:.78rem;color:var(--teal);font-weight:850;letter-spacing:.1em;margin-bottom:11px}.callout{background:#dff2ee;border-left:4px solid var(--teal);border-radius:0 12px 12px 0;padding:19px 23px;margin-top:25px}.callout strong{color:#075f65}.formula{font-family:Cambria,"Times New Roman",serif;font-size:clamp(1.05rem,2vw,1.3rem);text-align:center;background:#f5f8f8;border:1px solid var(--line);border-radius:12px;padding:16px 12px;margin:18px 0}.note{font-size:.9rem;color:var(--muted)}.tag{display:inline-block;padding:4px 10px;border-radius:99px;background:var(--light);color:#086b72;font-size:.72rem;font-weight:800;letter-spacing:.03em}.tag.gold{background:#fff2df;color:#815015}.profile{display:flex;gap:16px;align-items:flex-start}.avatar{width:48px;height:48px;border-radius:13px;flex:none;background:#d9eeeb;color:#087e83;display:grid;place-items:center;font-weight:850}.profile h3{margin:0 0 3px}.profile small{color:var(--muted);font-size:.84rem}.profile p{font-size:.9rem;margin-top:7px}.member-placeholder{border-style:dashed}.member-placeholder .avatar{background:#edf0f1;color:#75848d}
+    .timeline{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.step{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;position:relative}.step .day{font-size:.78rem;font-weight:850;color:var(--teal);text-transform:uppercase;letter-spacing:.08em}.step h3{font-size:1rem;margin:8px 0}.step p{font-size:.9rem;color:var(--muted);margin:0}
+    .task-intro{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:18px}.selected-count{font-size:.86rem;color:var(--muted)}.task-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px}.task{display:flex;flex-direction:column}.task .topline{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:13px}.task h3{font-size:1.13rem}.task .deliverable{margin-top:auto;padding-top:17px;font-size:.9rem;color:var(--ink)}.task .deliverable strong{display:block;color:var(--teal);font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}.task button{align-self:start;margin-top:17px;background:#fff;color:var(--teal);border:1px solid var(--teal)}.task button[aria-pressed="true"]{background:var(--teal);color:#fff}.task button:hover{background:var(--light)}.task button[aria-pressed="true"]:hover{background:#08696e}.selected-box{margin-top:20px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 22px}.selected-box p{margin:4px 0 0;color:var(--muted)}.selected-box a{font-weight:700}.reading{counter-reset:reading}.reading article{display:grid;grid-template-columns:44px 1fr;gap:15px;align-items:start;border-bottom:1px solid var(--line);padding:18px 0}.reading article:first-child{padding-top:0}.reading article:last-child{border:0}.reading .index{background:#dff2ee;border-radius:11px;color:var(--teal);height:40px;display:grid;place-items:center;font-weight:850}.reading h3{margin:0;font-size:1.06rem;line-height:1.45}.reading p{margin:6px 0 0;color:var(--muted);font-size:.94rem}.reading .cite{font-size:.84rem;color:#61727b;margin-top:3px}.footer{background:var(--ink);color:#d6e7e8;padding:32px 0}.footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}.footer a{color:#99ddd5}.footer p{margin:0;font-size:.88rem}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(max-width:850px){.hero .wrap{grid-template-columns:1fr;padding:65px 0}.hero-visual{max-width:520px}.grid-3,.task-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.timeline{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.wrap{width:min(100% - 28px,1120px)}.topbar .wrap{padding:13px 0;align-items:start;flex-direction:column;gap:8px}.nav{gap:5px 14px}.hero .wrap{padding:55px 0 60px;gap:28px}main section{padding:52px 0}.grid-3,.grid-2,.task-grid,.timeline{grid-template-columns:1fr}.section-head,.task-intro{display:block}.selected-count{display:block;margin-top:10px}.card{padding:21px}.footer .wrap{display:block}.footer p+p{margin-top:9px}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="#top">intro<span>2</span>pinns</a>
+      <nav class="nav" aria-label="Điều hướng chính">
+        <a href="#muc-tieu">Mục tiêu</a><a href="#thanh-vien">Thành viên</a><a href="#workflow">Workflow</a><a href="#tasks">Chọn task</a><a href="#tai-lieu">Tài liệu</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="hero" id="top">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow">Dự án nghiên cứu sinh viên · Cơ học tính toán</p>
+        <h1>Từ phương trình dầm đến <em>Physics-Informed Neural Networks</em></h1>
+        <p>Cùng xây dựng nghiệm giải tích, mô hình phần tử hữu hạn và PINN cho một bài toán chung. Từ đó trả lời bằng số liệu: khi nào PINN cho nghiệm chính xác, và chi phí tính toán của nó ra sao?</p>
+        <div class="actions"><a class="btn btn-primary" href="#tasks">Khám phá task →</a><a class="btn btn-outline" href="https://github.com/NhanNguyenMinh/intro2pinns" target="_blank" rel="noopener noreferrer">Xem mã nguồn ↗</a></div>
+        <div class="meta"><span>01 bài toán chuẩn</span><span>03 hướng triển khai</span><span>02 tuần khởi động</span></div>
+      </div>
+      <div class="hero-visual" role="img" aria-label="Minh họa dầm tựa đơn chịu tải phân bố đều, được giải bằng nghiệm giải tích, FEM và PINN">
+        <svg viewBox="0 0 480 290" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs><marker id="arrow" viewBox="0 0 8 8" refX="4" refY="6" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 0L4 8Z" fill="#e9ae57"/></marker></defs>
+          <text x="240" y="28" text-anchor="middle" fill="#dcebee" font-size="15" font-family="system-ui">q₀ · tải phân bố đều</text>
+          <g stroke="#e9ae57" stroke-width="2.5" marker-end="url(#arrow)"><path d="M90 58v49"/><path d="M150 58v49"/><path d="M210 58v49"/><path d="M270 58v49"/><path d="M330 58v49"/><path d="M390 58v49"/></g>
+          <path d="M60 126H420" stroke="#a8e2d9" stroke-width="12" stroke-linecap="round"/><path d="M60 141l-18 27h36zM420 141l-18 27h36z" fill="none" stroke="#a8e2d9" stroke-width="2"/><path d="M26 170h68M386 170h68" stroke="#a8e2d9" stroke-width="2"/>
+          <path d="M60 132Q240 229 420 132" fill="none" stroke="#e9ae57" stroke-width="4" stroke-dasharray="8 6"/><text x="240" y="225" text-anchor="middle" fill="#fff" font-size="18" font-family="Cambria,serif">EI w⁽⁴⁾(x) = q₀</text>
+          <text x="240" y="263" text-anchor="middle" fill="#cce2e4" font-size="14" font-family="system-ui">Giải tích  ·  FEM  ·  PINN</text>
+        </svg>
+        <p>Một mô hình chung, nhiều cách giải, cùng thước đo sai số.</p>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <section id="muc-tieu"><div class="wrap">
+      <p class="section-kicker">01 · Câu hỏi nghiên cứu</p><div class="section-head"><div><h2>Mục tiêu của dự án</h2><p class="lead">Dùng bài toán dầm Euler–Bernoulli 1D để học cách đặt bài toán, triển khai phương pháp số và đánh giá một cách công bằng.</p></div></div>
+      <div class="grid grid-3">
+        <div class="card"><div class="number">01 / HIỂU MÔ HÌNH</div><h3>Từ vật lý đến phương trình</h3><p>Nắm ý nghĩa của tải, độ cứng uốn, chuyển vị và điều kiện tựa đơn; kiểm tra đơn vị và quy ước dấu.</p></div>
+        <div class="card"><div class="number">02 / XÂY MỐC CHUẨN</div><h3>Giải tích và FEM</h3><p>Tự suy ra nghiệm chính xác để kiểm chứng. Cài đặt FEM Hermite như một baseline có thể đo sai số và thời gian.</p></div>
+        <div class="card"><div class="number">03 / ĐÁNH GIÁ PINN</div><h3>Không chỉ nhìn loss</h3><p>Huấn luyện PINN và so sánh sai số chuyển vị, mômen, điều kiện biên cùng chi phí tính toán trên tập điểm độc lập.</p></div>
+      </div>
+      <div class="callout"><strong>Câu hỏi dẫn đường:</strong> Loss huấn luyện nhỏ có bảo đảm nghiệm PINN chính xác không? Nếu không, sai khác xuất hiện ở đâu và có thể cải thiện bằng cách nào?</div>
+      <div class="formula" aria-label="Bài toán dầm Euler Bernoulli">EI&nbsp;w<sup>(4)</sup>(x) = q<sub>0</sub>, &nbsp; 0 &lt; x &lt; L<br>w(0) = w(L) = 0, &nbsp; w″(0) = w″(L) = 0</div>
+      <p class="note">Dầm tựa đơn chịu tải đều, với <em>EI</em>, <em>L</em>, <em>q<sub>0</sub></em> không đổi và dương. Đây là bài toán chuẩn duy nhất của giai đoạn khởi động.</p>
+    </div></section>
+
+    <section id="thanh-vien"><div class="wrap">
+      <p class="section-kicker">02 · Con người</p><div class="section-head"><div><h2>Nhóm thực hiện</h2><p class="lead">Ba sinh viên cùng nghiên cứu PINNs, mỗi người có thể chọn một mảng khởi đầu và cùng kiểm tra chéo kết quả.</p></div></div>
+      <div class="grid grid-2">
+        <article class="card profile"><div class="avatar" aria-hidden="true">NMN</div><div><h3>TS. Nguyễn Minh Nhân</h3><small>Người hướng dẫn</small><p>Bộ môn Toán học tính toán, Khoa Toán–Tin học, Trường Đại học Khoa học tự nhiên, ĐHQG-HCM.</p></div></article>
+        <article class="card profile"><div class="avatar" aria-hidden="true">LĐ</div><div><h3>Nguyễn Lin Đa</h3><small>Thành viên · sinh viên</small><p>Đăng ký task sau khi nhóm thống nhất phân công.</p></div></article>
+        <article class="card profile"><div class="avatar" aria-hidden="true">MT</div><div><h3>Trà Minh Thiện</h3><small>Thành viên · sinh viên</small><p>Mỗi kết quả nên được ít nhất một bạn khác kiểm tra.</p></div></article>
+        <article class="card profile"><div class="avatar" aria-hidden="true">TT</div><div><h3>Võ Trần Tiến</h3><small>Thành viên · sinh viên</small><p>Cùng dùng một bộ tham số và lưới đánh giá chung.</p></div></article>
+      </div>
+    </div></section>
+
+    <section id="workflow"><div class="wrap">
+      <p class="section-kicker">03 · Lộ trình khởi động</p><div class="section-head"><div><h2>Workflow trong hai tuần</h2><p class="lead">Các mốc này giúp ba nhánh triển khai gặp nhau ở cùng một phép so sánh, thay vì tạo ba kết quả không tương thích.</p></div></div>
+      <div class="timeline">
+        <div class="step"><span class="day">Ngày 1–2</span><h3>Đọc và chốt bài toán</h3><p>Đọc tài liệu nền, chọn <em>EI, L, q<sub>0</sub></em>, quy ước dấu, đơn vị và lưới đánh giá chung.</p></div>
+        <div class="step"><span class="day">Ngày 3–5</span><h3>Dựng baseline</h3><p>Kiểm tra nghiệm giải tích; cài đặt FEM Hermite và PINN tối thiểu cho cùng bài toán.</p></div>
+        <div class="step"><span class="day">Ngày 6–10</span><h3>Thí nghiệm có kiểm soát</h3><p>Thay một yếu tố mỗi lần: số điểm collocation hoặc trọng số biên. PINN chạy ít nhất ba seed.</p></div>
+        <div class="step"><span class="day">Ngày 11–14</span><h3>Đối chiếu và báo cáo</h3><p>Vẽ sai số–chi phí, nêu trường hợp thất bại, giải thích hạn chế và đề xuất một cải thiện.</p></div>
+      </div>
+      <div class="callout"><strong>Sản phẩm chung:</strong> mã nguồn chạy được, cấu hình và seed, đồ thị nghiệm/loss/sai số, bảng sai số–thời gian, cùng báo cáo ngắn có thể tái lập.</div>
+    </div></section>
+
+    <section id="tasks"><div class="wrap">
+      <p class="section-kicker">04 · Việc có thể chọn</p><div class="section-head"><div><h2>Task board</h2><p class="lead">Chọn một task chính để bắt đầu; các task bổ trợ có thể làm cùng nhau. Mọi nhánh đều cần hiểu mô hình và cách đo sai số.</p></div></div>
+      <div class="task-intro"><span class="tag">Chọn để lưu trên trình duyệt này</span><span class="selected-count" id="selected-count" aria-live="polite">Chưa chọn task</span></div>
+      <div class="task-grid">
+        <article class="card task"><div class="topline"><span class="tag gold">NỀN TẢNG</span><span class="number">T01</span></div><h3>Nghiệm giải tích</h3><p>Tích phân ODE, áp bốn điều kiện biên, kiểm tra lại phương trình; tính chuyển vị, mômen và các chuẩn sai số.</p><div class="deliverable"><strong>Đầu ra</strong>Công thức nghiệm được chứng minh và hàm đánh giá chuẩn.</div><button class="btn btn-small" type="button" data-task="T01 · Nghiệm giải tích" aria-pressed="false">Chọn task</button></article>
+        <article class="card task"><div class="topline"><span class="tag gold">BASELINE</span><span class="number">T02</span></div><h3>FEM Hermite</h3><p>Viết dạng yếu, phần tử Hermite bậc ba, lắp ráp và áp điều kiện biên; đánh giá trường cả trong phần tử.</p><div class="deliverable"><strong>Đầu ra</strong>Code FEM, kiểm tra hội tụ và bảng sai số theo số phần tử.</div><button class="btn btn-small" type="button" data-task="T02 · FEM Hermite" aria-pressed="false">Chọn task</button></article>
+        <article class="card task"><div class="topline"><span class="tag gold">TRỌNG TÂM</span><span class="number">T03</span></div><h3>PINN cơ bản</h3><p>Phi thứ nguyên hóa; dùng mạng trơn và đạo hàm tự động bậc bốn; tối thiểu hóa residual phương trình và điều kiện biên.</p><div class="deliverable"><strong>Đầu ra</strong>Code huấn luyện, loss theo bước và nghiệm dự đoán.</div><button class="btn btn-small" type="button" data-task="T03 · PINN cơ bản" aria-pressed="false">Chọn task</button></article>
+        <article class="card task"><div class="topline"><span class="tag">THÍ NGHIỆM</span><span class="number">T04</span></div><h3>Độ nhạy PINN</h3><p>Khảo sát <em>N<sub>c</sub></em> hoặc <em>λ<sub>b</sub></em>; cố định kiến trúc, optimizer, số bước và cách lấy mẫu. Chạy ít nhất ba seed.</p><div class="deliverable"><strong>Đầu ra</strong>Bảng cấu hình–seed–sai số và nhận xét về biến thiên kết quả.</div><button class="btn btn-small" type="button" data-task="T04 · Độ nhạy PINN" aria-pressed="false">Chọn task</button></article>
+        <article class="card task"><div class="topline"><span class="tag">ĐÁNH GIÁ</span><span class="number">T05</span></div><h3>Đo sai số và chi phí</h3><p>Dùng lưới đánh giá độc lập; đo sai số chuyển vị, mômen, biên, thời gian giải và thời gian dự đoán.</p><div class="deliverable"><strong>Đầu ra</strong>Biểu đồ sai số–chi phí và so sánh tại cùng mức sai số nếu khả thi.</div><button class="btn btn-small" type="button" data-task="T05 · Đo sai số và chi phí" aria-pressed="false">Chọn task</button></article>
+        <article class="card task"><div class="topline"><span class="tag">TỔNG HỢP</span><span class="number">T06</span></div><h3>Tái lập và báo cáo</h3><p>Ghi môi trường, tham số, seed và trường hợp không hội tụ; đọc đồ thị để giải thích ưu, nhược và hướng cải thiện.</p><div class="deliverable"><strong>Đầu ra</strong>README chạy thử, hình/bảng kết quả và báo cáo ngắn.</div><button class="btn btn-small" type="button" data-task="T06 · Tái lập và báo cáo" aria-pressed="false">Chọn task</button></article>
+      </div>
+      <div class="selected-box"><strong>Danh sách quan tâm của bạn</strong><p id="selected-list" aria-live="polite">Chưa chọn task nào. Lựa chọn chỉ được lưu trên trình duyệt này; hãy trao đổi với nhóm để phân công chính thức.</p><p><a href="https://github.com/NhanNguyenMinh/intro2pinns/issues" target="_blank" rel="noopener noreferrer">Trao đổi và theo dõi công việc trên GitHub Issues ↗</a></p></div>
+    </div></section>
+
+    <section id="tai-lieu"><div class="wrap">
+      <p class="section-kicker">05 · Reading guide</p><div class="section-head"><div><h2>Tài liệu cần đọc và hiểu</h2><p class="lead">Đọc hai tài liệu đầu trước khi viết code; hai bài tiếp theo giúp đặt kết quả của nhóm trong bối cảnh PINNs và phép so sánh với FEM.</p></div></div>
+      <div class="grid grid-2">
+        <div class="card"><span class="tag gold">ĐỌC TRƯỚC</span><div class="reading">
+          <article><span class="index">1</span><div><h3><a href="https://doi.org/10.15377/2409-5761.2022.09.8" target="_blank" rel="noopener noreferrer">A Gentle Introduction to Physics-Informed Neural Networks, with Applications in Static Rod and Beam Problems</a></h3><p class="cite">Katsikis, Muradova &amp; Stavroulakis · 2022</p><p>Đọc mục 3 và Problem 2 ở mục 4.1. Cần hiểu residual, điều kiện biên, đạo hàm tự động và cách xây dựng loss cho dầm.</p><p class="note"><strong>Lưu ý:</strong> bài báo gọi nhầm điều kiện <em>w = w″ = 0</em> ở hai đầu là “totally clamped”; với bài toán này đó là tựa đơn.</p></div></article>
+          <article><span class="index">2</span><div><h3><a href="https://doi.org/10.1007/978-3-030-47952-7" target="_blank" rel="noopener noreferrer">MATLAB Codes for Finite Element Analysis: Solids and Structures</a></h3><p class="cite">Ferreira &amp; Fantuzzi · 2020 · chương “Bernoulli Beams”, tr. 89–104</p><p>Cần hiểu dạng yếu, hàm dạng Hermite, bậc tự do nút và cách lắp ráp ma trận độ cứng.</p></div></article>
+        </div></div>
+        <div class="card"><span class="tag">ĐỌC SAU KHI CÓ BASELINE</span><div class="reading">
+          <article><span class="index">3</span><div><h3><a href="https://doi.org/10.1016/j.jcp.2018.10.045" target="_blank" rel="noopener noreferrer">Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations</a></h3><p class="cite">Raissi, Perdikaris &amp; Karniadakis · 2019</p><p>Hiểu ý tưởng PINN tổng quát và phân biệt loss vật lý với sai số nghiệm thực tế.</p></div></article>
+          <article><span class="index">4</span><div><h3><a href="https://doi.org/10.1093/imamat/hxae011" target="_blank" rel="noopener noreferrer">Can physics-informed neural networks beat the finite element method?</a></h3><p class="cite">Grossmann, Komorowska, Latz &amp; Schönlieb · 2024 · mục 2–3 và 7</p><p>Học cách thiết kế phép so sánh sai số–chi phí. Bài báo khảo sát các PDE khác, không phải dầm của dự án.</p></div></article>
+        </div></div>
+      </div>
+      <div class="callout"><strong>Sau mỗi bài đọc:</strong> ghi lại (1) mô hình/toán học chính, (2) điều gì có thể áp dụng trực tiếp cho bài toán dầm, (3) một câu hỏi còn chưa rõ. Đối chiếu với <a href="https://github.com/NhanNguyenMinh/intro2pinns/blob/main/README.md">README dự án</a> trước khi cài đặt.</div>
+    </div></section>
+  </main>
+
+  <footer class="footer"><div class="wrap"><p><strong>intro2pinns</strong> · Dự án nghiên cứu sinh viên do TS. Nguyễn Minh Nhân hướng dẫn</p><p><a href="https://github.com/NhanNguyenMinh/intro2pinns">GitHub repository ↗</a></p></div></footer>
+  <script>
+    (() => {
+      const key = 'intro2pinns:selected-tasks';
+      const buttons = [...document.querySelectorAll('[data-task]')];
+      let selected = [];
+      try { const saved = JSON.parse(localStorage.getItem(key) || '[]'); if (Array.isArray(saved)) selected = saved.filter(x => typeof x === 'string'); } catch (_) { /* Trang vẫn dùng được nếu bộ nhớ bị chặn. */ }
+      function render() {
+        buttons.forEach(button => { const active = selected.includes(button.dataset.task); button.setAttribute('aria-pressed', String(active)); button.textContent = active ? 'Đã chọn ✓' : 'Chọn task'; });
+        document.getElementById('selected-count').textContent = selected.length ? `Đã chọn ${selected.length} task` : 'Chưa chọn task';
+        document.getElementById('selected-list').textContent = selected.length ? `${selected.join(' · ')}. Lựa chọn chỉ được lưu trên trình duyệt này; hãy trao đổi với nhóm để phân công chính thức.` : 'Chưa chọn task nào. Lựa chọn chỉ được lưu trên trình duyệt này; hãy trao đổi với nhóm để phân công chính thức.';
+      }
+      buttons.forEach(button => button.addEventListener('click', () => { const name = button.dataset.task; selected = selected.includes(name) ? selected.filter(x => x !== name) : [...selected, name]; try { localStorage.setItem(key, JSON.stringify(selected)); } catch (_) {} render(); }));
+      render();
+    })();
+  </script>
+</body>
+</html>
