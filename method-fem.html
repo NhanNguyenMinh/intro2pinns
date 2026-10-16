@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lộ trình tự học FEM cho dầm Euler–Bernoulli: dạng yếu, phần tử Hermite, lắp ráp và kiểm tra hội tụ.">
+  <title>Tự học FEM cho bài toán dầm · intro2pinns</title>
+  <link rel="stylesheet" href="method-guide.css">
+</head>
+<body>
+  <header class="topbar"><div class="wrap"><a class="brand" href="index.html">intro<span>2</span>pinns</a><nav class="nav" aria-label="Điều hướng"><a href="index.html">Trang chủ</a><a href="reading-guide.html">Hướng dẫn đọc</a><a href="method-pinns.html">Lộ trình PINNs</a><a href="https://github.com/NhanNguyenMinh/intro2pinns" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav></div></header>
+  <div class="hero"><div class="wrap"><p class="eyebrow">Lộ trình tự học · Phương pháp phần tử hữu hạn</p><h1>FEM: từ dạng yếu đến nghiệm số</h1><p>Tám từ khóa theo đúng thứ tự cần học, kèm bài tập nhỏ và phép kiểm tra. Mục tiêu là xây dựng một FEM Hermite có thể đối chiếu công bằng với nghiệm giải tích và PINN.</p><div class="chips"><span>Dầm Euler–Bernoulli 1D</span><span>Phần tử Hermite bậc ba</span><span>Baseline cho PINN</span></div></div></div>
+  <main><div class="wrap layout">
+    <aside class="side"><strong>Trong trang này</strong><nav aria-label="Mục lục"><a href="#bai-toan">Bài toán chung</a><a href="#tu-khoa">8 từ khóa</a><a href="#thuc-hanh">Bài thực hành</a><a href="#kiem-tra">Tự kiểm</a><a href="#tai-lieu">Đọc và báo cáo</a></nav><a class="other" href="method-pinns.html">Chuyển sang PINNs →</a></aside>
+    <div>
+      <section class="panel" id="bai-toan"><p class="label">01 · Cùng một mô hình</p><h2>Dầm tựa đơn chịu tải đều</h2><p class="lead">Chọn độ dài L, độ cứng EI và tải q₀ dương. Chuyển vị w lấy dương theo chiều tải. Không đổi quy ước trong quá trình so sánh.</p><div class="formula">EI w⁽⁴⁾(x) = q₀, &nbsp; 0 &lt; x &lt; L<br>w(0)=w(L)=0, &nbsp; w″(0)=w″(L)=0</div><p>Mômen theo quy ước của dự án là M(x)=−EIw″(x). Nghiệm giải tích trong <a href="https://github.com/NhanNguyenMinh/intro2pinns/blob/main/README.md">README</a> là chuẩn kiểm tra.</p><div class="callout"><strong>Câu hỏi đầu tiên:</strong> tại sao chỉ cố định chuyển vị ở hai gối tựa, còn mômen bằng không được xử lý như điều kiện biên tự nhiên trong FEM?</div></section>
+
+      <section class="panel" id="tu-khoa"><p class="label">02 · Học theo trình tự</p><h2>Tám từ khóa FEM cần tìm hiểu</h2><p class="lead">Tra cứu từ khóa tiếng Anh, nhưng viết lời giải thích và bài làm bằng ký hiệu của dự án. Mỗi mục chỉ hoàn thành khi có minh chứng đi kèm.</p>
+        <ol class="path">
+          <li><h3>Euler–Bernoulli beam; simply supported boundary conditions</h3><p>Hiểu giả thiết tiết diện, tải phân bố, chuyển vị, độ cong và mômen. Phân biệt dầm tựa đơn với ngàm hai đầu.</p><p class="task"><strong>Làm được:</strong> vẽ dầm, ghi L, EI, q₀ và giải thích riêng từng điều kiện biên.</p></li>
+          <li><h3>Weak form; integration by parts twice</h3><p>Nhân phương trình với hàm thử v rồi tích phân từng phần hai lần. Theo dõi các hạng biên thay vì bỏ qua chúng.</p><p class="task"><strong>Làm được:</strong> tự suy ra ∫₀ᴸEIw″v″dx = ∫₀ᴸq₀v dx với v(0)=v(L)=0.</p></li>
+          <li><h3>Essential and natural boundary conditions</h3><p>Chuyển vị tại gối tựa là điều kiện thiết yếu; mômen bằng không là điều kiện tự nhiên của dạng yếu này.</p><p class="task"><strong>Làm được:</strong> chỉ ra điều kiện nào áp lên bậc tự do và điều kiện nào xuất hiện trong hạng biên.</p></li>
+          <li><h3>C¹ continuity; cubic Hermite beam element</h3><p>Dạng yếu chứa w″ nên không gian xấp xỉ phải có đạo hàm bậc nhất liên tục. Mỗi nút mang hai bậc tự do: w và θ=w′.</p><p class="task"><strong>Làm được:</strong> viết vectơ bậc tự do phần tử [wᵢ, θᵢ, wⱼ, θⱼ] và kiểm tra tính liên tục ở nút chung.</p></li>
+          <li><h3>Shape functions; element stiffness matrix; consistent load vector</h3><p>Đặt s=(x−xᵢ)/h và xấp xỉ wₕ bằng bốn hàm Hermite. Từ dạng yếu, tạo Kₑ và fₑ cho tải đều.</p><p class="task"><strong>Làm được:</strong> tự tính ít nhất Kₑ(1,1)=12EI/h³ và fₑ(1)=q₀h/2 để kiểm tra mã.</p></li>
+          <li><h3>Global assembly; Dirichlet boundary conditions</h3><p>Ánh xạ bậc tự do phần tử vào hệ toàn cục, cộng đóng góp của các phần tử rồi đặt w ở hai đầu bằng 0.</p><p class="task"><strong>Làm được:</strong> giải hệ với 1, 2 và 4 phần tử; kiểm tra ma trận đối xứng và kích thước hệ.</p></li>
+          <li><h3>Gaussian quadrature; finite element interpolation</h3><p>Tính tích phân phần tử và tái tạo wₕ(x), θₕ(x), wₕ″(x) tại điểm bất kỳ. Với EI, q₀ không đổi, tích phân Gauss hai điểm là đủ cho các đa thức của phần tử này.</p><p class="task"><strong>Làm được:</strong> đánh giá nghiệm ở giữa phần tử, không chỉ in các giá trị tại nút.</p></li>
+          <li><h3>Mesh convergence; L² error; bending moment recovery</h3><p>Đo sai số w và M=−EIw″ trên lưới đánh giá độc lập; tích phân sai số theo từng phần tử vì wₕ″ có thể gián đoạn tại nút.</p><p class="task"><strong>Làm được:</strong> vẽ sai số theo số phần tử và so thời gian lắp ráp/giải với PINN.</p></li>
+        </ol>
+      </section>
+
+      <section class="panel" id="thuc-hanh"><p class="label">03 · Bài thực hành tối thiểu</p><h2>Ba mốc để biết mình đã hiểu</h2><div class="two"><div class="card"><h3>A · Một phần tử trên giấy</h3><p>Suy ra dạng yếu, chọn bốn bậc tự do và lập Kₑ, fₑ. Kiểm tra đối xứng Kₑ và thứ nguyên: Kₑ(1,1) có đơn vị lực/chiều dài.</p></div><div class="card"><h3>B · Nhiều phần tử trong code</h3><p>Lắp ráp, áp w(0)=w(L)=0, giải hệ. So kết quả cho 1, 2, 4 và 8 phần tử với nghiệm giải tích.</p></div><div class="card"><h3>C · Đánh giá công bằng</h3><p>Dùng cùng EI, L, q₀ như nhóm PINN. Chọn điểm đánh giá độc lập với nút FEM; tính sai số chuyển vị và mômen.</p></div><div class="card"><h3>D · Đọc kết quả</h3><p>Giải thích vì sao nghiệm tại nút có thể trông rất tốt trong ví dụ tải đều, trong khi sai số bên trong phần tử vẫn cần được đo.</p></div></div><div class="callout warn"><strong>Tránh lỗi thường gặp:</strong> dùng phần tử tuyến tính chỉ có bậc tự do chuyển vị cho trực tiếp dạng yếu bậc bốn; so sánh chỉ tại nút; lấy wₕ″ tại đúng nút chung mà không nêu phía phần tử.</div></section>
+
+      <section class="panel" id="kiem-tra"><p class="label">04 · Tự kiểm trước khi báo cáo</p><h2>Checklist FEM</h2><div class="checks"><div><strong>01</strong> Dạng yếu được suy ra, không chỉ chép lại.</div><div><strong>02</strong> Điều kiện biên thiết yếu/tự nhiên được phân biệt.</div><div><strong>03</strong> Bậc tự do và hàm Hermite nhất quán với θ=w′.</div><div><strong>04</strong> Ma trận phần tử đối xứng, tải phần tử đúng dấu.</div><div><strong>05</strong> Nghiệm được đánh giá cả trong phần tử.</div><div><strong>06</strong> Có sai số w và M trên ít nhất ba cỡ lưới.</div></div><p style="margin-top:18px">Minh chứng cần nộp: <strong>một bản suy ra dạng yếu, code FEM chạy lại được, đồ thị nghiệm, bảng sai số–thời gian và một đoạn giải thích xu hướng hội tụ.</strong></p></section>
+
+      <section class="panel" id="tai-lieu"><p class="label">05 · Đọc và nộp</p><h2>Tài liệu chính</h2><p>Đọc chương <a href="https://doi.org/10.1007/978-3-030-47952-7_6" target="_blank" rel="noopener noreferrer"><em>Bernoulli Beams</em> trong Ferreira &amp; Fantuzzi (2020)</a>, tr. 89–104, đặc biệt phần mô hình, hàm dạng và ví dụ tĩnh. PDF đã được thầy chia sẻ trong thư mục docs của nhóm.</p><p>Ghi chú một trang theo mẫu: <strong>ý chính → công thức tự suy ra → phép kiểm tra code → câu hỏi còn vướng</strong>. Đưa kết quả cuối vào báo cáo Word hoặc LaTeX theo <a href="reading-guide.html#bao-cao">mẫu báo cáo chung</a>.</p><p><a class="button" href="method-pinns.html">Xem lộ trình PINNs →</a></p></section>
+    </div>
+  </div></main>
+  <footer class="footer"><div class="wrap"><p><strong>intro2pinns</strong> · FEM cho bài toán dầm chuẩn</p><p><a href="index.html">Trang chủ</a> · <a href="reading-guide.html">Hướng dẫn đọc</a></p></div></footer>
+</body>
+</html>
