@@ -8,24 +8,26 @@ Repo này là nơi nhóm ba sinh viên cùng học, cài đặt và đánh giá 
 
 Nhóm sẽ dùng nghiệm giải tích làm chuẩn và phương pháp phần tử hữu hạn (FEM) làm mốc so sánh. Trọng tâm là hiểu mô hình toán, tạo thí nghiệm có thể tái lập và giải thích kết quả bằng sai số đo được.
 
+**Mới bắt đầu với Python?** Học theo [bốn bài thực hành trong `learn-python/`](learn-python/README.md): CMD và Python cơ bản → NumPy/đồ thị/SymPy → hệ tuyến tính/FEM → PyTorch/PINN. Mỗi bài có [trang hướng dẫn](learn-python/index.html), notebook và script chạy độc lập.
+
 ## 1. Bài toán chuẩn: dầm Euler–Bernoulli 1D
 
 Xét dầm tựa đơn dài \(L\), độ cứng uốn \(EI\) không đổi, chịu tải phân bố đều \(q_0\). Gọi \(w(x)\) là chuyển vị theo chiều tải:
 
-\[
+$$
 EI\,w^{(4)}(x)=q_0,\qquad 0<x<L,
-\]
-\[
+$$
+$$
 w(0)=w(L)=0,\qquad w''(0)=w''(L)=0.
-\]
+$$
 
 Hai điều kiện \(w=0\) là chuyển vị tại gối tựa; hai điều kiện \(w''=0\) tương ứng với mômen uốn bằng không ở hai đầu. Chọn \(EI,L,q_0>0\) và quy ước chuyển vị cùng chiều tải là dương. Nghiệm giải tích của **mô hình dầm này** là
 
-\[
+$$
 w_*(x)=\frac{q_0}{24EI}
 \left(x^4-2Lx^3+L^3x\right),\qquad
 M_*(x)=-EI\,w_*''(x).
-\]
+$$
 
 Trước khi huấn luyện mạng, nhóm cần tự suy ra nghiệm và kiểm tra bằng cách thay vào phương trình cùng bốn điều kiện biên.
 
@@ -39,30 +41,30 @@ Trước khi huấn luyện mạng, nhóm cần tự suy ra nghiệm và kiểm 
 
 Dạng yếu cho FEM: đặt \(V=\{v\in H^2(0,L):v(0)=v(L)=0\}\); tìm \(w\in V\) sao cho
 
-\[
+$$
 \int_0^L EI\,w''v''\,dx=\int_0^Lq_0v\,dx
 \quad\text{với mọi }v\in V.
-\]
+$$
 
 Trong bài toán này, chuyển vị bằng không tại hai đầu được áp trực tiếp; mômen bằng không là điều kiện biên tự nhiên của dạng yếu.
 
 Để huấn luyện PINN ở thang số thuận tiện, đặt
 
-\[
+$$
 \xi=\frac{x}{L},\qquad
 u(\xi)=\frac{EI}{q_0L^4}w(x).
-\]
+$$
 
 Khi đó \(u^{(4)}=1\) trên \((0,1)\), còn \(u(0)=u(1)=u''(0)=u''(1)=0\). Với mạng \(u_\alpha\), một hàm loss cơ bản là
 
-\[
+$$
 \mathcal L(\alpha)=
 \underbrace{\frac{1}{N_c}\sum_{i=1}^{N_c}
 \bigl[u_\alpha^{(4)}(\xi_i)-1\bigr]^2}_{\mathcal L_{\mathrm{PDE}}}
 +
 \lambda_b\underbrace{\sum_{s\in\{0,1\}}
 \bigl[u_\alpha(s)^2+u_\alpha''(s)^2\bigr]}_{\mathcal L_{\mathrm{BC}}}.
-\]
+$$
 
 Cần dùng hàm kích hoạt đủ trơn, chẳng hạn \(\tanh\), để tính đạo hàm bậc bốn bằng đạo hàm tự động. Giá trị loss tại các điểm huấn luyện **không thay thế** phép đo sai số nghiệm trên tập điểm độc lập.
 
@@ -76,12 +78,12 @@ Cần dùng hàm kích hoạt đủ trơn, chẳng hạn \(\tanh\), để tính 
 
 Hai đại lượng chính:
 
-\[
+$$
 e_w=\frac{\|w_{\mathrm{num}}-w_*\|_{L^2(0,L)}}
 {\|w_*\|_{L^2(0,L)}},\qquad
 e_M=\frac{\|M_{\mathrm{num}}-M_*\|_{L^2(0,L)}}
 {\|M_*\|_{L^2(0,L)}}.
-\]
+$$
 
 Ngoài ra, báo cáo sai số điều kiện biên, \(\mathcal L_{\mathrm{PDE}}\), \(\mathcal L_{\mathrm{BC}}\), thời gian lắp ráp và giải FEM, thời gian huấn luyện PINN, cùng thời gian dự đoán sau huấn luyện. Ghi nhận cả những lần chạy không hội tụ. So sánh thời gian trên cùng phần cứng và ghi rõ điều kiện dừng; nếu khả thi, so thời gian đạt cùng một mức sai số.
 

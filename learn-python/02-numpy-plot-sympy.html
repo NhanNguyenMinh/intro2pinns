@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="vi">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Bài 02: NumPy, phép toán ma trận, Matplotlib và SymPy qua nghiệm dầm."><title>02 · NumPy, đồ thị và SymPy · intro2pinns</title><link rel="stylesheet" href="tutorial.css"></head>
+<body>
+<header class="topbar"><div class="wrap"><a class="brand" href="index.html">intro<span>2</span>pinns / Python</a><nav aria-label="Điều hướng"><a href="index.html">Tổng quan</a><a href="01-cmd-python.html">← Bài 01</a><a href="03-linear-fem.html">Bài 03 →</a></nav></div></header>
+<div class="hero"><div class="wrap"><p class="eyebrow">Bài 02 · Tính toán khoa học</p><h1>Mảng, đồ thị và kiểm tra ký hiệu</h1><p>Chuyển từ tính một giá trị w(x) sang tính cả một lưới; phân biệt phép toán theo phần tử và phép nhân ma trận; vẽ kết quả và tự kiểm tra phương trình.</p><div class="chips"><span>NumPy</span><span>Matplotlib</span><span>SymPy</span><span>Đầu ra: beam_reference.png</span></div></div></div>
+<main class="wrap">
+<section class="panel"><p class="label">Khởi động</p><h2>Chạy script và xem hình</h2><pre><code>cd /d DUONG_DAN_DEN_REPO\learn-python
+conda activate intro2pinns-learning
+python 02-numpy-plot-sympy.py
+dir outputs</code></pre><p>Script tạo <code>outputs/beam_reference.png</code> gồm chuyển vị và mômen chính xác. Mở <a href="https://github.com/NhanNguyenMinh/intro2pinns/blob/main/learn-python/02-numpy-plot-sympy.ipynb">notebook bài 02</a> để thay tham số từng bước. Đọc <a href="https://github.com/NhanNguyenMinh/intro2pinns/blob/main/learn-python/02-numpy-plot-sympy.py">script hoàn chỉnh</a> để thấy cách tạo thư mục và lưu hình.</p></section>
+<section class="panel"><p class="label">Từ list đến ndarray</p><h2>NumPy tính nhiều điểm cùng lúc</h2><pre><code>import numpy as np
+x = np.linspace(0.0, 1.0, 201)
+w = (x**4 - 2*x**3 + x) / 24
+print(x.shape, w.shape, w.max())</code></pre><p><code>x</code> là <code>ndarray</code> gồm 201 điểm; biểu thức được áp dụng trên toàn mảng. Khi lắp ráp FEM, hãy luôn kiểm tra <code>shape</code>, kiểu dữ liệu và thứ tự các chỉ số. NumPy dùng <code>*</code> cho phép nhân theo phần tử, <code>@</code> cho nhân ma trận:</p><pre><code>a = np.array([[1., 2.], [3., 4.]])
+b = np.array([[2., 0.], [1., 2.]])
+print(a * b)
+print(a @ b)</code></pre><div class="callout warn"><strong>Nhầm lẫn phổ biến:</strong> Python <code>list</code> và NumPy <code>ndarray</code> khác nhau; <code>*</code> của hai mảng NumPy không phải phép nhân ma trận. Đọc thêm <a href="https://numpy.org/doc/stable/user/quickstart.html">NumPy quickstart</a>.</div></section>
+<section class="panel"><p class="label">Hình và công thức</p><h2>Vẽ để kiểm tra, không chỉ để minh họa</h2><div class="formula">w(x)=q₀(x⁴−2Lx³+L³x)/(24EI), &nbsp; M(x)=q₀x(L−x)/2</div><p>Dùng <code>matplotlib.pyplot</code> để vẽ w và M theo x/L; luôn thêm nhãn trục, đơn vị hoặc ghi rõ đại lượng đã chuẩn hóa, chú giải và tên file. Dùng SymPy để kiểm tra:</p><pre><code>import sympy as sp
+x, L, EI, q0 = sp.symbols("x L EI q0", positive=True)
+w = q0*(x**4 - 2*L*x**3 + L**3*x)/(24*EI)
+print(sp.simplify(EI*sp.diff(w, x, 4) - q0))  # phải bằng 0</code></pre><p>Tiếp tục thay x=0 và x=L vào w, w″ để kiểm tra cả bốn điều kiện biên. <strong>SymPy giúp kiểm tra phép suy luận</strong>; bài báo cáo vẫn phải nêu được cách suy ra nghiệm bằng tay.</p></section>
+<section class="panel"><p class="label">Tự làm</p><h2>Đầu ra cần có</h2><ol class="steps"><li><h3>So sánh list và ndarray</h3><p>Tạo một <code>list</code> và một <code>ndarray</code> chứa [1,2,3]. Dự đoán kết quả khi nhân với 2 rồi chạy kiểm tra.</p></li><li><h3>Kiểm tra điểm cực trị</h3><p>Từ mảng đã tạo, tìm vị trí và giá trị lớn nhất của w, M; đối chiếu với x=L/2.</p></li><li><h3>Kiểm tra bằng ký hiệu</h3><p>Trình bày kết quả SymPy của phương trình và bốn điều kiện biên. Đổi q₀ hoặc EI để kiểm tra thang độ lớn.</p></li></ol><div class="task"><strong>Nộp sau bài 02:</strong> một hình có hai đồ thị w, M; kết quả kiểm tra Symbolic; giải thích bằng lời vì sao <code>a*b</code> khác <code>a@b</code>. Sau bài 04, có thể chạy lại script với <code>--plot-pinn</code> để vẽ CSV của PINN trong một tiến trình riêng.</div><div class="bottom-nav"><a class="button ghost" href="01-cmd-python.html">← Bài 01</a><a class="button" href="03-linear-fem.html">Bài 03: hệ tuyến tính →</a></div></section>
+</main><footer class="footer"><div class="wrap"><p><strong>intro2pinns</strong> · Python foundations</p><p><a href="../reading-guide.html">Hướng dẫn đọc tài liệu</a></p></div></footer>
+</body></html>

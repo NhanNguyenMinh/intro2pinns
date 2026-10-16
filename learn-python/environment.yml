@@ -1,0 +1,12 @@
+name: intro2pinns-learning
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - numpy
+  - scipy
+  - matplotlib
+  - sympy
+  - jupyterlab
+  - ipykernel
