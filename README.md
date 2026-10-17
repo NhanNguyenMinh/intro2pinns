@@ -10,6 +10,8 @@ Nhóm sẽ dùng nghiệm giải tích làm chuẩn và phương pháp phần t�
 
 **Mới bắt đầu với Python?** Học theo [bốn bài thực hành trong `learn-python/`](learn-python/README.md): CMD và Python cơ bản → NumPy/đồ thị/SymPy → hệ tuyến tính/FEM → PyTorch/PINN. Mỗi bài có [trang hướng dẫn](learn-python/index.html), notebook và script chạy độc lập.
 
+**Mới bắt đầu với cơ học và FEM?** Đọc [bài giảng từ giả thiết Euler–Bernoulli đến nghiệm FEM](beam-fem-foundations.html) trước bài thực hành số 03.
+
 ## 1. Bài toán chuẩn: dầm Euler–Bernoulli 1D
 
 Xét dầm tựa đơn dài \(L\), độ cứng uốn \(EI\) không đổi, chịu tải phân bố đều \(q_0\). Gọi \(w(x)\) là chuyển vị theo chiều tải:

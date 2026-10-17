@@ -2,7 +2,7 @@
 <html lang="vi">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Bài 03: giải hệ tuyến tính bằng SciPy và lắp ráp FEM Hermite cho dầm Euler–Bernoulli."><title>03 · Hệ tuyến tính và FEM · intro2pinns</title><link rel="stylesheet" href="tutorial.css"></head>
 <body>
-<header class="topbar"><div class="wrap"><a class="brand" href="index.html">intro<span>2</span>pinns / Python</a><nav aria-label="Điều hướng"><a href="index.html">Tổng quan</a><a href="02-numpy-plot-sympy.html">← Bài 02</a><a href="04-torch-pinn.html">Bài 04 →</a></nav></div></header>
+<header class="topbar"><div class="wrap"><a class="brand" href="index.html">intro<span>2</span>pinns / Python</a><nav aria-label="Điều hướng"><a href="index.html">Tổng quan</a><a href="../beam-fem-foundations.html">Lý thuyết dầm → FEM</a><a href="02-numpy-plot-sympy.html">← Bài 02</a><a href="04-torch-pinn.html">Bài 04 →</a></nav></div></header>
 <div class="hero"><div class="wrap"><p class="eyebrow">Bài 03 · Cầu nối sang FEM</p><h1>Từ hệ 2×2 đến phần tử dầm</h1><p>Học cách giải Kd=f, rồi thấy cùng thao tác xuất hiện sau khi lắp ráp các phần tử Hermite. Cuối bài, bạn đo được sai số của FEM khi tăng số phần tử.</p><div class="chips"><span>SciPy linalg</span><span>Ma trận phần tử</span><span>Lắp ráp</span><span>Hội tụ lưới</span></div></div></div>
 <main class="wrap">
 <section class="panel"><p class="label">Bước 1</p><h2>Giải một hệ nhỏ có thể kiểm tra bằng tay</h2><div class="formula">A = [[3,1],[1,2]], &nbsp; b = [9,8], &nbsp; A x = b</div><pre><code>import numpy as np
