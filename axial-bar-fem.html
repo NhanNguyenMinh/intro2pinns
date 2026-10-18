@@ -66,29 +66,77 @@
         <div class="callout gold"><strong>Đừng giải \(\mathbf K^e\mathbf u^e=\mathbf f_q^e\) riêng từng phần tử.</strong> Các phần tử dùng chung chuyển vị ở nút nối; chỉ tổng các đóng góp mới cho phương trình cân bằng tại nút đó.</div>
       </section>
 
-      <section class="panel" id="lap-ghep"><p class="kicker">04 · Thấy rõ phép cộng</p><h2>Hai phần tử tạo hệ toàn cục \(\mathbf K\mathbf u=\mathbf F\)</h2><p>Chọn số liệu \(L=2,\ EA=2,\ q=1,\ P=3,\ g=0\). Chia thanh thành hai phần tử dài \(h=1\), với các nút \(x_0=0,\ x_1=1,\ x_2=2\). Mỗi phần tử có</p>
+      <section class="panel" id="lap-ghep">
+        <p class="kicker">04 · Vì sao phải cộng?</p>
+        <h2>Từ tổng tích phân phần tử đến hệ toàn cục</h2>
+        <p><strong>Điểm xuất phát là dạng yếu trên toàn thanh.</strong> Các phần tử phủ kín miền \([0,L]\) và không chồng lấn ở bên trong, nên mỗi tích phân trên toàn miền bằng tổng các tích phân trên từng phần tử. Với \(v_h(0)=0\), lực đầu phải vẫn là hạng công biên \(Pv_h(L)\):</p>
+        <div class="eq">\[\begin{aligned}
+          0&=\int_0^L EA\,u_h'v_h'\,dx-\int_0^Lqv_h\,dx-Pv_h(L)\\
+           &=\sum_{e=0}^{n-1}
+             \left[\int_e EA\,u_h'v_h'\,dx-\int_e qv_h\,dx\right]
+             -Pv_h(L)\\
+           &=\sum_{e=0}^{n-1}(\mathbf v^e)^{\mathsf T}
+             (\mathbf K^e\mathbf u^e-\mathbf f_q^e)-Pv_n.
+        \end{aligned}\]</div>
+        <p>Đây là lý do của <strong>lắp ghép</strong>: các ma trận và véc-tơ phần tử xuất hiện bên trong một <em>tổng</em>. Ở nút chung, hai phần tử sử dụng cùng một chuyển vị \(u_i\) và cùng một hệ số thử \(v_i\), nên các đóng góp của chúng phải cộng vào cùng vị trí toàn cục. Không được cho từng biểu thức trong tổng bằng 0 một cách độc lập.</p>
+
+        <h3>Quy tắc tổng quát cho \(n\) phần tử</h3>
+        <p>Đặt \(\mathbf u=[u_0,u_1,\ldots,u_n]^{\mathsf T}\) và
+          \(\mathbf v=[v_0,v_1,\ldots,v_n]^{\mathsf T}\).
+          Phần tử \(e\) nối hai nút toàn cục \(i_e,j_e\). Ma trận chọn \(\mathbf A_e\), kích thước \(2\times(n+1)\), lấy đúng hai thành phần của véc-tơ toàn cục:
+          \(\mathbf u^e=\mathbf A_e\mathbf u=[u_{i_e},u_{j_e}]^{\mathsf T}\),
+          \(\mathbf v^e=\mathbf A_e\mathbf v=[v_{i_e},v_{j_e}]^{\mathsf T}\).
+          Gọi \(\mathbf e_n\) là véc-tơ đơn vị tại nút cuối; \(v_n=\mathbf v^{\mathsf T}\mathbf e_n\).</p>
+        <div class="eq">\[\begin{aligned}
+          0&=\sum_e(\mathbf A_e\mathbf v)^{\mathsf T}
+              \bigl(\mathbf K^e\mathbf A_e\mathbf u-\mathbf f_q^e\bigr)
+              -P\mathbf v^{\mathsf T}\mathbf e_n\\
+           &=\mathbf v^{\mathsf T}
+             \left[
+               \underbrace{\left(\sum_e\mathbf A_e^{\mathsf T}\mathbf K^e\mathbf A_e\right)}_{\mathbf K}
+               \mathbf u-
+               \underbrace{\left(\sum_e\mathbf A_e^{\mathsf T}\mathbf f_q^e
+                             +P\mathbf e_n\right)}_{\mathbf F}
+             \right].
+        \end{aligned}\]</div>
+        <div class="eq">\[\boxed{\mathbf K=\sum_e\mathbf A_e^{\mathsf T}\mathbf K^e\mathbf A_e,\qquad
+          \mathbf F=\underbrace{\sum_e\mathbf A_e^{\mathsf T}\mathbf f_q^e}_{\mathbf F_q}
+                    +\underbrace{P\mathbf e_n}_{\mathbf F_P}.}\]</div>
+        <p>Công thức này cho thấy rõ: <strong>ma trận toàn cục</strong> là tổng ma trận độ cứng phần tử đã đặt đúng vị trí; <strong>véc-tơ tải toàn cục</strong> là tổng tải phân bố quy về nút, cộng tải tập trung ở đúng nút chịu lực. Nếu có thêm lực nút tại nút \(k\), cộng thêm \(P_k\mathbf e_k\); nếu \(EA\) hoặc \(q\) khác nhau theo phần tử, dùng \(\mathbf K^e,\mathbf f_q^e\) riêng của từng phần tử.</p>
+        <p>Để thực hiện bằng tay hoặc trong code, nếu phần tử \(e\) nối nút \(i\) và \(j\), cộng sáu đóng góp sau vào các ô toàn cục (mũi tên nghĩa là cập nhật giá trị đang có):</p>
+        <div class="eq">\[\begin{aligned}
+          K_{ii}&\leftarrow K_{ii}+(K^e)_{11},&
+          K_{ij}&\leftarrow K_{ij}+(K^e)_{12},\\
+          K_{ji}&\leftarrow K_{ji}+(K^e)_{21},&
+          K_{jj}&\leftarrow K_{jj}+(K^e)_{22},\\
+          F_i&\leftarrow F_i+(f_q^e)_1,&
+          F_j&\leftarrow F_j+(f_q^e)_2.
+        \end{aligned}\]</div>
+        <p>Khởi tạo \(\mathbf K=\mathbf0,\mathbf F=\mathbf0\); thực hiện phép cộng trên cho mọi phần tử; cuối cùng cộng các lực nút như \(P\) vào \(\mathbf F\). Cách viết theo chỉ số này tương đương với công thức dùng \(\mathbf A_e\).</p>
+
+        <h3>Ví dụ nhìn thấy từng ô được cộng</h3>
+        <p>Chọn \(L=2,\ EA=2,\ q=1,\ P=3,\ g=0\). Chia thanh thành hai phần tử dài \(h=1\), các nút \(x_0=0,\ x_1=1,\ x_2=2\). Cả hai phần tử đều có</p>
         <div class="eq">\[\mathbf K^0=\mathbf K^1=
           \begin{bmatrix}2&-2\\-2&2\end{bmatrix},\qquad
           \mathbf f_q^0=\mathbf f_q^1=
           \begin{bmatrix}1/2\\1/2\end{bmatrix}.\]</div>
         <figure class="diagram"><svg viewBox="0 0 800 195" role="img" aria-label="Hai phần tử thanh: phần tử 0 nối nút 0 và 1; phần tử 1 nối nút 1 và 2; nút 1 dùng chung"><path d="M90 63H710" stroke="#087e83" stroke-width="9" stroke-linecap="round"/><g fill="#102a3a"><circle cx="90" cy="63" r="9"/><circle cx="400" cy="63" r="9"/><circle cx="710" cy="63" r="9"/></g><g font-family="system-ui" text-anchor="middle"><text x="90" y="38" fill="#102a3a" font-size="17">nút 0</text><text x="400" y="38" fill="#102a3a" font-size="17">nút 1 dùng chung</text><text x="710" y="38" fill="#102a3a" font-size="17">nút 2</text><text x="245" y="91" fill="#087e83" font-size="17">phần tử 0</text><text x="555" y="91" fill="#087e83" font-size="17">phần tử 1</text></g><rect x="78" y="116" width="275" height="45" rx="9" fill="#e7f4f2"/><rect x="446" y="116" width="275" height="45" rx="9" fill="#fff4e4"/><text x="215" y="145" text-anchor="middle" fill="#087e83" font-family="system-ui" font-size="18">u⁰ = [u₀, u₁]ᵀ</text><text x="583" y="145" text-anchor="middle" fill="#9b5e1f" font-family="system-ui" font-size="18">u¹ = [u₁, u₂]ᵀ</text><text x="400" y="186" text-anchor="middle" fill="#526473" font-family="system-ui" font-size="15">Hai ma trận phần tử cùng góp vào hàng và cột của nút 1.</text></svg><figcaption>Nút 1 có một chuyển vị \(u_1\), nên đóng góp từ hai phần tử được cộng vào cùng hàng/cột.</figcaption></figure>
-        <p>Đặt \(\mathbf u=[u_0,u_1,u_2]^{\mathsf T}\). Viết hai ma trận \(2\times2\) vào các chỉ số toàn cục \([0,1]\) và \([1,2]\); các vị trí trùng nhau được cộng:</p>
+        <p>Phần tử 0 góp vào hàng/cột \(0,1\); phần tử 1 góp vào hàng/cột \(1,2\). Viết từng ma trận vào đúng vị trí và cộng:</p>
         <div class="eq">\[\mathbf K=
-          \underbrace{\begin{bmatrix}2&-2&0\\-2&2&0\\0&0&0\end{bmatrix}}_{\text{phần tử 0}}
-          +\underbrace{\begin{bmatrix}0&0&0\\0&2&-2\\0&-2&2\end{bmatrix}}_{\text{phần tử 1}}
+          \underbrace{\begin{bmatrix}2&-2&0\\-2&2&0\\0&0&0\end{bmatrix}}_{\mathbf A_0^{\mathsf T}\mathbf K^0\mathbf A_0}
+          +\underbrace{\begin{bmatrix}0&0&0\\0&2&-2\\0&-2&2\end{bmatrix}}_{\mathbf A_1^{\mathsf T}\mathbf K^1\mathbf A_1}
           =\boxed{\begin{bmatrix}2&-2&0\\-2&4&-2\\0&-2&2\end{bmatrix}}.\]</div>
-        <p>Đối với tải, cộng hai véc-tơ tải phân bố rồi cộng lực đầu mút \(P\) tại nút 2:</p>
-        <div class="eq">\[\mathbf F_q=
-          \begin{bmatrix}1/2\\1/2\\0\end{bmatrix}
-          +\begin{bmatrix}0\\1/2\\1/2\end{bmatrix}
-          =\begin{bmatrix}1/2\\1\\1/2\end{bmatrix},\quad
-          \mathbf F_P=\begin{bmatrix}0\\0\\3\end{bmatrix},\quad
-          \boxed{\mathbf F=\mathbf F_q+\mathbf F_P=
-          \begin{bmatrix}1/2\\1\\7/2\end{bmatrix}.}\]</div>
-        <p>Chẳng hạn, \(K_{11}=2+2=4\) và \(F_1=1/2+1/2=1\). Đây chính là phép lắp ghép. Với lưới bất kỳ, nếu \(\mathbf A_e\) chọn hai bậc tự do của phần tử từ véc-tơ toàn cục, công thức chung là</p>
-        <div class="eq">\[\mathbf K=\sum_e\mathbf A_e^{\mathsf T}\mathbf K^e\mathbf A_e,\qquad
-          \mathbf F=\sum_e\mathbf A_e^{\mathsf T}\mathbf f_q^e+\mathbf F_P.\]</div>
-        <div class="callout"><strong>Điểm tinh tế:</strong> trước khi áp \(u_0=g\), \(\mathbf K\) là ma trận lắp ghép và \(\mathbf F\) là tải đã biết. Đẳng thức \(\mathbf K\mathbf u=\mathbf F\) được áp trên các <em>bậc tự do tự do</em>; hàng tại nút bị giữ có thêm phản lực chưa biết.</div>
+        <p>Tương tự, cộng tải phân bố từ hai phần tử rồi cộng \(P\) tại nút 2:</p>
+        <div class="eq">\[\begin{aligned}
+          \mathbf F_q&=
+          \underbrace{\begin{bmatrix}1/2\\1/2\\0\end{bmatrix}}_{\mathbf A_0^{\mathsf T}\mathbf f_q^0}
+          +\underbrace{\begin{bmatrix}0\\1/2\\1/2\end{bmatrix}}_{\mathbf A_1^{\mathsf T}\mathbf f_q^1}
+          =\begin{bmatrix}1/2\\1\\1/2\end{bmatrix},\\
+          \mathbf F&=\mathbf F_q+\underbrace{\begin{bmatrix}0\\0\\3\end{bmatrix}}_{P\mathbf e_2}
+          =\boxed{\begin{bmatrix}1/2\\1\\7/2\end{bmatrix}}.
+        \end{aligned}\]</div>
+        <p>Chẳng hạn \(K_{11}=2+2=4\) và \(F_1=1/2+1/2=1\), vì nút 1 thuộc cả hai phần tử. Hàng tại nút 0 liên quan đến chuyển vị được giữ \(u_0=g\); khi lập phương trình cho các bậc tự do tự do, hàng đó được thay bằng điều kiện chuyển vị và về sau dùng để tính phản lực.</p>
+        <div class="callout"><strong>Phát biểu chính xác của \(\mathbf K\mathbf u=\mathbf F\):</strong> từ \(\mathbf v^{\mathsf T}(\mathbf K\mathbf u-\mathbf F)=0\) với mọi hàm thử hợp lệ, các hàng ứng với bậc tự do tự do có phần dư bằng 0. Hàng ở nút bị giữ có thể khác 0; giá trị phần dư đó là phản lực. <a href="#dieu-kien-bien">Mục 5</a> thực hiện bước này.</div>
       </section>
 
       <section class="panel" id="dieu-kien-bien"><p class="kicker">05 · Áp điều kiện biên đúng chỗ</p><h2>Chuyển vị cho trước, lực cho trước và phản lực</h2><div class="table-wrap"><table class="table"><thead><tr><th>Dữ liệu</th><th>Đặt vào đâu?</th><th>Trong ví dụ</th></tr></thead><tbody><tr><td>Tải phân bố \(q\)</td><td>Tích phân \(\mathbf f_q^e=\int_e q\mathbf N^{\mathsf T}dx\), rồi lắp ghép.</td><td>\(\mathbf F_q=[1/2,1,1/2]^{\mathsf T}\)</td></tr><tr><td>Lực đầu mút \(P\)</td><td>Cộng một lần vào thành phần tải của bậc tự do tại đầu phải.</td><td>\(\mathbf F_P=[0,0,3]^{\mathsf T}\)</td></tr><tr><td>Chuyển vị \(u_0=g\)</td><td>Đặt vào nhóm bậc tự do đã biết; giải hệ rút gọn cho các bậc tự do còn lại.</td><td>\(u_0=0\)</td></tr><tr><td>Phản lực \(R_0\)</td><td>Tính sau khi có nghiệm: \(R_0=(\mathbf K\mathbf u-\mathbf F)_0\).</td><td>\(R_0=-5\)</td></tr></tbody></table></div>
