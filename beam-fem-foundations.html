@@ -52,44 +52,85 @@ N_3&=3s^2-2s^3,&N_4&=h_e(-s^2+s^3).
 \end{aligned}\]</div><figure class="diagram"><svg viewBox="0 0 800 210" role="img" aria-label="Lưới dầm ba phần tử bốn nút, mỗi nút có độ võng và góc xoay"><path d="M65 80H735" stroke="#087e83" stroke-width="8" stroke-linecap="round"/><path d="M65 95l-18 23h36zM735 95l-18 23h36z" fill="#fff" stroke="#102a3a" stroke-width="2"/><path d="M35 121h60M705 121h60" stroke="#102a3a" stroke-width="2"/><g fill="#102a3a"><circle cx="65" cy="80" r="8"/><circle cx="288" cy="80" r="8"/><circle cx="512" cy="80" r="8"/><circle cx="735" cy="80" r="8"/></g><g font-family="system-ui" text-anchor="middle" fill="#102a3a" font-size="16"><text x="65" y="55">0</text><text x="288" y="55">1</text><text x="512" y="55">2</text><text x="735" y="55">3</text><text x="176" y="107">e₁</text><text x="400" y="107">e₂</text><text x="624" y="107">e₃</text><text x="65" y="160">w₀ = 0</text><text x="288" y="160">w₁, θ₁</text><text x="512" y="160">w₂, θ₂</text><text x="735" y="160">w₃ = 0</text></g><text x="400" y="197" text-anchor="middle" fill="#526473" font-family="system-ui" font-size="15">Ở gối tựa, góc xoay θ₀ và θ₃ vẫn là ẩn số tự do.</text></svg><figcaption>Rời rạc miền giống slide FEM: mỗi phần tử nối hai nút, nhưng phần tử dầm có hai bậc tự do ở mỗi nút.</figcaption></figure><p>Nếu bắt đầu từ đa thức \(w_h^e=a_0+a_1s+a_2s^2+a_3s^3\) và áp bốn điều kiện \(w_h^e(x_i)=w_i,\ (w_h^e)'(x_i)=\theta_i,\ w_h^e(x_{i+1})=w_{i+1},\ (w_h^e)'(x_{i+1})=\theta_{i+1}\) (đạo hàm theo \(x\)), ta thu được đúng bốn hàm Hermite đã viết ở trên. Đây là bước “xây dựng hàm dạng” của slide.</p><p>Hai hàm dạng gắn với chuyển vị nút; hai hàm còn lại gắn với góc xoay. Hệ số \(h_e\) trong \(N_2,N_4\) giữ đúng thứ nguyên chiều dài khi nhân với \(\theta\).</p><div class="callout gold"><strong>Vì sao không dùng nội suy tuyến tính \(C^0\)?</strong> Đạo hàm bậc hai của một hàm tuyến tính bằng 0 bên trong phần tử và độ dốc nhảy tại nút. Nó không thuộc không gian \(H^2\) theo cách ghép tiêu chuẩn ở đây. Có các FEM hỗn hợp hoặc không phù hợp khác, nhưng đó là mô hình rời rạc khác.</div></section>
 
       <section class="panel" id="phan-tu">
-        <p class="kicker">05 · Từ tích phân đến ma trận</p>
-        <h2>Từ hàm thử tổng quát đến \(\mathbf K_e,\mathbf f_e\)</h2>
-        <p><strong>Bước 1 — Giữ hàm thử tổng quát.</strong> Sau khi chia dầm thành các phần tử \(e=[x_i,x_{i+1}]\), dạng yếu rời rạc là: tìm \(w_h\in V_h\) sao cho</p>
-        <div class="eq">\[\sum_e\int_e EI\,w_h''v_h''\,dx
-          =\sum_e\int_e q_0v_h\,dx\qquad\forall v_h\in V_h.\]</div>
-        <p>Ta <em>chưa</em> chọn \(v_h=N_A\). Trên phần tử \(e\), cả nghiệm và hàm thử đều là tổ hợp của bốn hàm Hermite \(N_A^e\) đã viết ở mục 4:</p>
+        <p class="kicker">05 · Phép biến đổi như trong slide</p>
+        <h2>Từ hàm thử tổng quát đến ma trận và véc-tơ phần tử</h2>
+        <p><strong>Điểm khác với slide:</strong> slide lần lượt lấy hàm kiểm tra là từng hàm dạng \(N_i,N_{i+1}\). Ở đây ta giữ <em>một hàm kiểm tra tổng quát</em> dưới dạng tổ hợp tuyến tính của các hàm dạng. Slide có thể ký hiệu hàm này là \(w\); trang này gọi là \(v_h\) để không nhầm với độ võng \(w_h\) đang cần tìm. Các hệ số của \(v_h\) là tùy ý sau khi áp điều kiện biên thiết yếu.</p>
+
+        <div class="eq">\[
+          w_{\mathrm{test}}^e(x)=\sum_{A=1}^{m_e}N_A^e(x)\widehat w_A
+          \quad\text{(ký hiệu theo ý thầy)}
+          \qquad\Longleftrightarrow\qquad
+          v_h|_e(x)=\sum_{A=1}^{m_e}N_A^e(x)c_{e,A}
+          \quad\text{(ký hiệu dùng dưới đây).}
+        \]</div><p>Hai biểu thức là một; \(m_e=2\) cho thanh tuyến tính, \(m_e=4\) cho dầm Hermite. Các hệ số \(\widehat w_A\) hoặc \(c_{e,A}\) là hệ số <em>hàm kiểm tra</em>, không phải các ẩn chuyển vị.</p>
+        <h3>1. Làm lại phép thế trên phần tử thanh hai nút</h3>
+        <p>Với phần tử thanh \([x_i,x_{i+1}]\), đặt \(N_1=N_i,\ N_2=N_{i+1}\). Viết <strong>cả hai hàm</strong> dưới dạng tổng, thay vì chọn ngay \(v_h=N_1\) hoặc \(v_h=N_2\):</p>
+        <div class="eq">\[
+          u_h^e=N_1u_1+N_2u_2=\sum_{B=1}^{2}N_Bu_B,\qquad
+          v_h^e=N_1c_1+N_2c_2=\sum_{A=1}^{2}N_Ac_A.
+        \]</div>
+        <p>Ở đây \(u_B\) là chuyển vị nút cần tìm, còn \(c_A\) là hệ số của hàm kiểm tra. Để tập trung vào phép biến đổi, xét tải phân bố \(q\) và chưa có lực tập trung ở biên. Thế vào đóng góp dạng yếu của phần tử thanh:</p>
+        <div class="eq">\[\begin{aligned}
+          R_e(v_h)
+          &=\int_e EA\,u_h'v_h'\,dx-\int_e qv_h\,dx\\
+          &=\int_e EA
+             \left(\sum_{B=1}^2N_B'u_B\right)
+             \left(\sum_{A=1}^2N_A'c_A\right)dx
+             -\int_e q\left(\sum_{A=1}^2N_Ac_A\right)dx\\
+          &=\sum_{A=1}^2c_A
+             \left[
+               \sum_{B=1}^2
+               \underbrace{\left(\int_e EA\,N_A'N_B'\,dx\right)}_{(K_e)_{AB}}u_B
+               -\underbrace{\int_e qN_A\,dx}_{(f_e)_A}
+             \right].
+        \end{aligned}\]</div>
+        <p>Viết hết hai hệ số \(c_1,c_2\) sẽ thấy ngay hai hàng của <em>véc-tơ đóng góp phần tử</em>:</p>
+        <div class="eq">\[
+          R_e(v_h)
+          =c_1\bigl[(K_e)_{11}u_1+(K_e)_{12}u_2-(f_e)_1\bigr]
+          +c_2\bigl[(K_e)_{21}u_1+(K_e)_{22}u_2-(f_e)_2\bigr]
+          =\mathbf c_e^{\mathsf T}(\mathbf K_e\mathbf u_e-\mathbf f_e).
+        \]</div>
+        <div class="callout"><strong>Chú ý quan trọng:</strong> \(R_e(v_h)\) là <em>đóng góp</em> của phần tử vào phương trình toàn cục. Các hệ số kiểm tra ở nút chung của hai phần tử là cùng một hệ số, nên không được kết luận \(\mathbf K_e\mathbf u_e=\mathbf f_e\) riêng cho từng phần tử. Phải cộng đóng góp rồi mới dùng tính tùy ý của hàm kiểm tra để lấy các hàng phương trình toàn cục.</div>
+
+        <h3>2. Áp đúng phép biến đổi ấy cho dầm Hermite</h3>
+        <p>Dạng yếu của dầm dùng đạo hàm bậc <strong>hai</strong> thay vì bậc một. Mỗi phần tử có bốn hàm dạng và bốn bậc tự do \(\mathbf d_e=[w_i,\theta_i,w_{i+1},\theta_{i+1}]^{\mathsf T}\). Hàm kiểm tra tổng quát trên phần tử được biểu diễn bằng cùng cơ sở Hermite:</p>
         <div class="eq">\[\begin{aligned}
           w_h|_e&=\sum_{B=1}^4N_B^e d_{e,B}
-                 =\mathbf N_e\mathbf d_e,
-          &\mathbf d_e&=[w_i,\theta_i,w_{i+1},\theta_{i+1}]^{\mathsf T},\\
+                 =\mathbf N_e\mathbf d_e,\\
           v_h|_e&=\sum_{A=1}^4N_A^e c_{e,A}
-                 =\mathbf N_e\mathbf c_e,
-          &\mathbf c_e&=[v_i,v_i',v_{i+1},v_{i+1}']^{\mathsf T}.
+                 =\mathbf N_e\mathbf c_e,\qquad
+          \mathbf c_e=[v_i,v_i',v_{i+1},v_{i+1}']^{\mathsf T}.
         \end{aligned}\]</div>
-        <p>\(\mathbf d_e\) gồm các ẩn chuyển vị/góc xoay; \(\mathbf c_e\) gồm hệ số của <strong>một hàm thử tùy ý</strong>. Hàm thử và nghiệm dùng cùng cơ sở vì đây là Galerkin. Các hệ số tại nút chung được dùng chung bởi hai phần tử kề nhau; do đó \(\mathbf c_e\) của các phần tử <em>không độc lập</em>. Ở hai gối tựa, \(v_0=v_n=0\), còn \(v_0'\) và \(v_n'\) được phép khác không.</p>
-        <p><strong>Bước 2 — Lấy đạo hàm rồi thế vào từng tích phân.</strong> Đặt \(\mathbf B_e=\mathbf N_e''\) (đạo hàm theo tọa độ vật lý \(x\)). Khi đó \(w_h''=\mathbf B_e\mathbf d_e\) và \(v_h''=\mathbf B_e\mathbf c_e\):</p>
+        <p>Vì \(w_h''=\sum_B(N_B^e)''d_{e,B}\) và \(v_h''=\sum_A(N_A^e)''c_{e,A}\), thay vào <strong>tích phân trên một phần tử</strong> và gom theo từng hệ số kiểm tra:</p>
         <div class="eq">\[\begin{aligned}
-          \int_e EI\,w_h''v_h''\,dx
-          &=\mathbf c_e^{\mathsf T}
-            \left[\int_e EI\,\mathbf B_e^{\mathsf T}\mathbf B_e\,dx\right]\mathbf d_e,\\
-          \int_e q_0v_h\,dx
-          &=\mathbf c_e^{\mathsf T}
-            \left[\int_e q_0\,\mathbf N_e^{\mathsf T}\,dx\right].
+          R_e(v_h)
+          &=\int_e EI\,w_h''v_h''\,dx-\int_e q_0v_h\,dx\\
+          &=\int_e EI
+             \left(\sum_{B=1}^4(N_B^e)''d_{e,B}\right)
+             \left(\sum_{A=1}^4(N_A^e)''c_{e,A}\right)dx
+             -\int_e q_0\sum_{A=1}^4N_A^ec_{e,A}\,dx\\
+          &=\sum_{A=1}^4c_{e,A}
+             \left[
+               \sum_{B=1}^4
+                 \underbrace{\left(\int_e EI\,(N_A^e)''(N_B^e)''\,dx\right)}_{(K_e)_{AB}}
+                 d_{e,B}
+               -\underbrace{\int_e q_0N_A^e\,dx}_{(f_e)_A}
+             \right]\\
+          &=\mathbf c_e^{\mathsf T}(\mathbf K_e\mathbf d_e-\mathbf f_e).
         \end{aligned}\]</div>
-        <p>Vì các véc-tơ hệ số không phụ thuộc \(x\), ta đưa chúng ra ngoài dấu tích phân. Phần nằm trong ngoặc vuông chính là <strong>ma trận độ cứng phần tử</strong> và <strong>véc-tơ tải phần tử</strong>:</p>
+        <p>Đây là chính phép biến đổi của slide thanh: đổi \(EA\,N_A'N_B'\) thành \(EI\,(N_A^e)''(N_B^e)''\), và đổi hai hàm dạng thành bốn hàm Hermite. Viết gọn với \(\mathbf B_e=\mathbf N_e''\):</p>
         <div class="eq">\[\boxed{
-          (K_e)_{AB}=\int_e EI\,(N_A^e)''(N_B^e)''\,dx,\qquad
-          (f_e)_A=\int_e q_0N_A^e\,dx,\quad A,B=1,\ldots,4.}\]</div>
-        <p>Do đó đóng góp của phần tử vào dạng yếu là
-          \(\mathbf c_e^{\mathsf T}(\mathbf K_e\mathbf d_e-\mathbf f_e)\).
-          Đây vẫn là một <em>biểu thức vô hướng</em>, chưa phải hệ bốn phương trình độc lập cho từng phần tử.</p>
-        <p><strong>Bước 3 — Tính các tích phân thật sự.</strong> Với \(s=(x-x_i)/h\), ta có \(dx=h\,ds\), \(d/dx=h^{-1}d/ds\). Hàng đạo hàm bậc hai của bốn hàm Hermite là</p>
+          \mathbf K_e=\int_e EI\,\mathbf B_e^{\mathsf T}\mathbf B_e\,dx,\qquad
+          \mathbf f_e=\int_e q_0\,\mathbf N_e^{\mathsf T}\,dx.}
+        \]</div>
+        <p>Với \(s=(x-x_i)/h\), \(dx=h\,ds\) và \(d/dx=h^{-1}d/ds\), ta có</p>
         <div class="eq">\[\mathbf B_e(s)=
           \left[\frac{-6+12s}{h^2},\;
                 \frac{-4+6s}{h},\;
                 \frac{6-12s}{h^2},\;
                 \frac{-2+6s}{h}\right].\]</div>
-        <p>Ví dụ một phần tử của ma trận và một thành phần véc-tơ tải:</p>
+        <p>Ví dụ, tính tường minh một ô của ma trận và một thành phần của véc-tơ tải:</p>
         <div class="eq">\[\begin{aligned}
           (K_e)_{11}
           &=EI\,h\int_0^1\frac{(-6+12s)^2}{h^4}\,ds
@@ -98,7 +139,7 @@ N_3&=3s^2-2s^3,&N_4&=h_e(-s^2+s^3).
           &=q_0h\int_0^1(1-3s^2+2s^3)\,ds
             =\frac{q_0h}{2}.
         \end{aligned}\]</div>
-        <p>Tính tương tự 16 tích phân cho \(K_e\) và bốn tích phân cho \(f_e\) (chỉ cần 10 tích phân ma trận khác nhau nhờ đối xứng) được:</p>
+        <p>Tính các ô còn lại theo đúng công thức tích phân trên, với \(EI,q_0\) không đổi trên phần tử, được</p>
         <div class="eq">\[\boxed{\mathbf K_e=\frac{EI}{h^3}
           \begin{bmatrix}
           12&6h&-12&6h\\
@@ -108,7 +149,7 @@ N_3&=3s^2-2s^3,&N_4&=h_e(-s^2+s^3).
           \end{bmatrix},\qquad
           \mathbf f_e=\frac{q_0h}{12}
           \begin{bmatrix}6\\h\\6\\-h\end{bmatrix}.}\]</div>
-        <div class="callout"><strong>Kiểm tra trước khi lắp ghép:</strong> \(K_e=K_e^{\mathsf T}\), \((K_e)_{11}=12EI/h^3\), \((f_e)_1=q_0h/2\). Ma trận phần tử riêng lẻ suy biến vì chuyển động cứng; điều đó không có nghĩa phép tích phân sai.</div>
+        <p>Kiểm tra \(K_e=K_e^{\mathsf T}\). Ở <a href="#he-toan-cuc">mục tiếp theo</a>, ta cộng các đóng góp \(R_e(v_h)\) rồi mới suy ra hệ phương trình từ tính tùy ý của các hệ số \(c_j\) toàn cục.</p>
       </section>
 
       <section class="panel" id="he-toan-cuc">
