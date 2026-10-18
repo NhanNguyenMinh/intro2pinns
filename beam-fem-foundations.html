@@ -150,46 +150,53 @@ N_3&=3s^2-2s^3,&N_4&=h_e(-s^2+s^3).
 
       <section class="panel" id="he-toan-cuc">
         <p class="kicker">06 · Từ phần tử sang toàn dầm</p>
-        <h2>Lắp ghép, chọn hàm thử và áp điều kiện biên</h2>
-        <p><strong>Bước 3 — Ánh xạ về bậc tự do toàn cục.</strong> Với \(n\) phần tử, đặt
-          \(\mathbf d=[w_0,\theta_0,w_1,\theta_1,\ldots,w_n,\theta_n]^{\mathsf T}\)
-          và \(\mathbf v=[v_0,\varphi_0,v_1,\varphi_1,\ldots,v_n,\varphi_n]^{\mathsf T}\) cho hàm thử, với \(v_i=v_h(x_i)\), \(\varphi_i=v_h'(x_i)\). Nếu phần tử \(e\) nối nút \(e\) và \(e+1\), bốn chỉ số của nó là
-          \([2e,2e+1,2e+2,2e+3]\) khi bắt đầu đếm từ 0.
-          Gọi \(\mathbf A_e\) là ma trận chọn bậc tự do, kích thước \(4\times 2(n+1)\), sao cho
-          \(\mathbf d_e=\mathbf A_e\mathbf d\) và \(\mathbf v^e=\mathbf A_e\mathbf v\).</p>
+        <h2>Từ dạng yếu FEM đến hệ \(\mathbf K\mathbf d=\mathbf f\)</h2>
+        <p>Xét hai phần tử \(0=[x_0,x_1]\) và \(1=[x_1,x_2]\).
+          Mỗi nút có hai bậc tự do \((w_i,\theta_i)\). Đặt
+          \(\mathbf d=[w_0,\theta_0,w_1,\theta_1,w_2,\theta_2]^{\mathsf T}\),
+          \(\mathbf v=[v_0,\varphi_0,v_1,\varphi_1,v_2,\varphi_2]^{\mathsf T}\).
+          Trên mỗi phần tử, \(w_h=\mathbf N\mathbf d_e\), \(v_h=\mathbf N\mathbf v_e\),
+          \(w_h''=\mathbf B\mathbf d_e\) và \(v_h''=\mathbf B\mathbf v_e\).
+          Vì tích phân trên toàn dầm bằng tổng hai tích phân phần tử, thay các xấp xỉ vào dạng yếu cho</p>
         <div class="eq">\[\begin{aligned}
-          0&=\sum_e(\mathbf v^e)^{\mathsf T}(\mathbf K_e\mathbf d_e-\mathbf f_e)\\
-           &=\mathbf v^{\mathsf T}
-             \left[\left(\sum_e\mathbf A_e^{\mathsf T}\mathbf K_e\mathbf A_e\right)\mathbf d
-                    -\sum_e\mathbf A_e^{\mathsf T}\mathbf f_e\right].
+          (\mathbf v^0)^{\mathsf T}\mathbf K^0\mathbf d^0
+          +(\mathbf v^1)^{\mathsf T}\mathbf K^1\mathbf d^1
+          &=(\mathbf v^0)^{\mathsf T}\mathbf f^0
+           +(\mathbf v^1)^{\mathsf T}\mathbf f^1,\\
+          \mathbf K_e&=\int_e EI\,\mathbf B^{\mathsf T}\mathbf B\,dx,\qquad
+          \mathbf f_e=\int_e q_0\,\mathbf N^{\mathsf T}\,dx.
         \end{aligned}\]</div>
-        <p>Vậy <strong>lắp ghép</strong> nghĩa là cộng các hệ số có cùng cặp chỉ số hàng–cột toàn cục và cộng các tải có cùng chỉ số bậc tự do:</p>
-        <div class="eq">\[\boxed{\mathbf K=\sum_e\mathbf A_e^{\mathsf T}\mathbf K_e\mathbf A_e,\qquad
-          \mathbf f=\sum_e\mathbf A_e^{\mathsf T}\mathbf f_e.}\]</div>
+        <p>Ở đây \(\mathbf d^0=[w_0,\theta_0,w_1,\theta_1]^{\mathsf T}\) và
+          \(\mathbf d^1=[w_1,\theta_1,w_2,\theta_2]^{\mathsf T}\);
+          \(\mathbf v^0,\mathbf v^1\) có thứ tự tương ứng. Hai phần tử dùng cùng
+          \(w_1,\theta_1\) nên các đóng góp tại nút 1 phải cộng.</p>
         <figure class="diagram"><svg viewBox="0 0 800 194" role="img" aria-label="Hai phần tử dầm kề nhau dùng chung nút một, nên các đóng góp ma trận cùng cộng vào bậc tự do w một và theta một"><path d="M90 64H710" stroke="#087e83" stroke-width="8" stroke-linecap="round"/><g fill="#102a3a"><circle cx="90" cy="64" r="9"/><circle cx="400" cy="64" r="9"/><circle cx="710" cy="64" r="9"/></g><g fill="#102a3a" font-family="system-ui" font-size="17" text-anchor="middle"><text x="90" y="39">Nút 0</text><text x="400" y="39">Nút 1: dùng chung</text><text x="710" y="39">Nút 2</text><text x="245" y="92">Phần tử 0</text><text x="555" y="92">Phần tử 1</text></g><rect x="38" y="115" width="320" height="49" rx="9" fill="#e7f4f2"/><rect x="442" y="115" width="320" height="49" rx="9" fill="#fff4e4"/><text x="198" y="146" text-anchor="middle" fill="#087e83" font-family="system-ui" font-size="17">[w₀, θ₀, w₁, θ₁]</text><text x="602" y="146" text-anchor="middle" fill="#9b5e1f" font-family="system-ui" font-size="17">[w₁, θ₁, w₂, θ₂]</text><text x="400" y="187" text-anchor="middle" fill="#526473" font-family="system-ui" font-size="15">Các hàng/cột của w₁ và θ₁ nhận đóng góp từ cả hai phần tử.</text></svg><figcaption>Hai phần tử dùng chung nút 1 nên các đóng góp ở nút này được cộng, không tạo hai nút độc lập.</figcaption></figure>
-        <p><strong>Ví dụ hai phần tử.</strong> Chia \(L=1\) thành hai đoạn \(h=1/2\), lấy \(EI=q_0=1\). Mỗi phần tử có cùng \(\mathbf K_e,\mathbf f_e\). Chia \(K_e\) thành bốn khối \(2\times2\) ứng với hai nút đầu/cuối, và \(f_e\) thành hai khối \(2\times1\). Khi đó cấu trúc lắp ghép là</p>
-        <div class="eq">\[\mathbf K=
-          \begin{bmatrix}
-          K_{11}^{(0)}&K_{12}^{(0)}&0\\
-          K_{21}^{(0)}&K_{22}^{(0)}+K_{11}^{(1)}&K_{12}^{(1)}\\
-          0&K_{21}^{(1)}&K_{22}^{(1)}
+        <p>Chia mỗi \(\mathbf K_e\) thành bốn khối \(2\times2\) và mỗi \(\mathbf f_e\) thành hai véc-tơ hai thành phần:</p>
+        <div class="eq">\[\mathbf K_e=\begin{bmatrix}\mathbf K_{11}^{(e)}&\mathbf K_{12}^{(e)}\\mathbf K_{21}^{(e)}&\mathbf K_{22}^{(e)}\end{bmatrix},\qquad
+          \mathbf f_e=\begin{bmatrix}\mathbf f_1^{(e)}\\mathbf f_2^{(e)}\end{bmatrix}.\]</div>
+        <p>Đặt khối của phần tử 0 vào các nút \((0,1)\), khối của phần tử 1 vào \((1,2)\).
+          Dạng yếu rời rạc ở trên trở thành \(\mathbf v^{\mathsf T}\mathbf K\mathbf d=\mathbf v^{\mathsf T}\mathbf f\), với</p>
+        <div class="eq">\[\boxed{
+          \mathbf K=\begin{bmatrix}
+            \mathbf K_{11}^{(0)}&\mathbf K_{12}^{(0)}&\mathbf 0\\
+            \mathbf K_{21}^{(0)}&\mathbf K_{22}^{(0)}+\mathbf K_{11}^{(1)}&\mathbf K_{12}^{(1)}\\
+            \mathbf 0&\mathbf K_{21}^{(1)}&\mathbf K_{22}^{(1)}
           \end{bmatrix},\qquad
-          \mathbf f=
-          \begin{bmatrix}
-          f_1^{(0)}\\f_2^{(0)}+f_1^{(1)}\\f_2^{(1)}
-          \end{bmatrix}.\]</div>
-        <p>Mỗi ô của công thức khối là ma trận \(2\times2\) hoặc véc-tơ hai thành phần. Chẳng hạn, bậc tự do \(w_1\) nhận
-          \(K_{w_1w_1}=96+96=192\) và \(f_{w_1}=1/4+1/4=1/2\); bậc tự do \(\theta_1\) nhận
-          \(K_{\theta_1\theta_1}=8+8=16\) và \(f_{\theta_1}=-1/48+1/48=0\).
-          Đây là phép cộng cụ thể tại nút chung.</p>
-        <p><strong>Bước 4 — Từ “mọi hàm thử” đến các hàng phương trình.</strong> Ở gối tựa, \(w_0=w_n=0\) và hàm thử cũng phải có \(v_0=v_n=0\). Các thành phần còn lại của \(\mathbf v\) tùy ý. Từ
-          \(\mathbf v^{\mathsf T}(\mathbf K\mathbf d-\mathbf f)=0\) với mọi \(\mathbf v\) hợp lệ, ta được
-          \((\mathbf K\mathbf d-\mathbf f)_j=0\) tại <em>mỗi bậc tự do tự do</em> \(j\).
-          Chọn riêng \((\mathbf v)_j=1\), các thành phần thử tự do khác bằng 0, chính là lấy một hàm cơ sở toàn cục làm hàm thử để viết hàng \(j\). Các hàng tại \(w_0,w_n\) không dùng để giải chuyển vị; sau khi giải có thể dùng chúng để tính phản lực gối.</p>
-        <div class="eq">\[\boxed{\mathbf K_{ff}\mathbf d_f
-          =\mathbf f_f-\mathbf K_{fc}\mathbf d_c,\qquad
-          \mathbf d_c=\mathbf0\ \Longrightarrow
-          \mathbf K_{ff}\mathbf d_f=\mathbf f_f.}\]</div>
+          \mathbf f=\begin{bmatrix}
+            \mathbf f_1^{(0)}\\
+            \mathbf f_2^{(0)}+\mathbf f_1^{(1)}\\
+            \mathbf f_2^{(1)}
+          \end{bmatrix}.}\]</div>
+        <p>Khối giữa là tổng từ hai phần tử vì cả hai tích phân trong dạng yếu đều chứa bậc tự do ở nút 1.
+          Với \(L=1\), hai phần tử dài \(h=1/2\), \(EI=q_0=1\):
+          \(K_{w_1w_1}=96+96=192\), \(K_{\theta_1\theta_1}=8+8=16\),
+          \(f_{w_1}=1/4+1/4=1/2\) và \(f_{\theta_1}=-1/48+1/48=0\).</p>
+        <p>Ở hai gối tựa \(w_0=w_2=0\), do đó \(v_0=v_2=0\). Trên bốn bậc tự do còn lại,
+          \(\mathbf v^{\mathsf T}(\mathbf K\mathbf d-\mathbf f)=0\) dẫn trực tiếp đến hệ
+          <strong>\(\mathbf K_{ff}\mathbf d_f=\mathbf f_f-\mathbf K_{fc}\mathbf d_c\)</strong>;
+          ở đây \(\mathbf d_c=\mathbf 0\), nên \(\mathbf K_{ff}\mathbf d_f=\mathbf f_f\).
+          Đó chính là hệ \(\mathbf K\mathbf d=\mathbf f\) sau khi áp điều kiện biên.
+          Các hàng tại \(w_0,w_2\) dùng để tính phản lực sau khi giải.</p>
         <p>Với ví dụ hai phần tử, \(\mathbf d_f=[\theta_0,w_1,\theta_1,\theta_2]^{\mathsf T}\); hệ rút gọn sau khi đặt \(w_0=w_2=0\) là</p>
         <div class="eq">\[
           \begin{bmatrix}
