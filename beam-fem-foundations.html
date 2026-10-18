@@ -54,83 +54,79 @@ N_3&=3s^2-2s^3,&N_4&=h_e(-s^2+s^3).
       <section class="panel" id="phan-tu">
         <p class="kicker">05 · Phép biến đổi như trong slide</p>
         <h2>Từ hàm thử tổng quát đến ma trận và véc-tơ phần tử</h2>
-        <p><strong>Điểm khác với slide:</strong> slide lần lượt lấy hàm kiểm tra là từng hàm dạng \(N_i,N_{i+1}\). Ở đây ta giữ <em>một hàm kiểm tra tổng quát</em> dưới dạng tổ hợp tuyến tính của các hàm dạng. Slide có thể ký hiệu hàm này là \(w\); trang này gọi là \(v_h\) để không nhầm với độ võng \(w_h\) đang cần tìm. Các hệ số của \(v_h\) là tùy ý sau khi áp điều kiện biên thiết yếu.</p>
+        <p>Ta giữ hàm thử <strong>tổng quát</strong> trong suốt phép biến đổi. Ký hiệu \(v_h\) cho hàm thử, \(u_h\) cho chuyển vị dọc trục của thanh, \(w_h\) cho độ võng của dầm. Chữ đậm chỉ véc-tơ hoặc ma trận; chỉ số trên \(e\) chỉ phần tử.</p>
 
+        <h3>1. Phần tử thanh hai nút: phép nhân véc-tơ thay cho chọn từng \(N_i\)</h3>
+        <p>Trên phần tử \(e=[x_i,x_{i+1}]\), gọi hai hàm dạng là \(N_1,N_2\). Viết hàm chuyển vị xấp xỉ và <em>hàm thử bất kỳ</em> bằng cùng véc-tơ hàng hàm dạng:</p>
+        <div class="eq">\[\begin{gathered}
+          \mathbf N=[\,N_1\;\;N_2\,],\qquad
+          \mathbf u^e=\begin{bmatrix}u_1\\u_2\end{bmatrix},\qquad
+          \mathbf v^e=\begin{bmatrix}v_1\\v_2\end{bmatrix},\\
+          u_h|_e=N_1u_1+N_2u_2=\mathbf N\mathbf u^e,\qquad
+          v_h|_e=N_1v_1+N_2v_2=\mathbf N\mathbf v^e.
+        \end{gathered}\]</div>
+        <p>\(u_1,u_2\) là ẩn chuyển vị nút. \(v_1,v_2\) là các giá trị nút tùy ý của hàm thử (trừ các bậc tự do bị điều kiện biên thiết yếu giữ bằng 0). Đặt \(\mathbf B=\mathbf N'=[\,N_1'\;\;N_2'\,]\), ta có</p>
         <div class="eq">\[
-          w_{\mathrm{test}}^e(x)=\sum_{A=1}^{m_e}N_A^e(x)\widehat w_A
-          \quad\text{(ký hiệu theo ý thầy)}
-          \qquad\Longleftrightarrow\qquad
-          v_h|_e(x)=\sum_{A=1}^{m_e}N_A^e(x)c_{e,A}
-          \quad\text{(ký hiệu dùng dưới đây).}
-        \]</div><p>Hai biểu thức là một; \(m_e=2\) cho thanh tuyến tính, \(m_e=4\) cho dầm Hermite. Các hệ số \(\widehat w_A\) hoặc \(c_{e,A}\) là hệ số <em>hàm kiểm tra</em>, không phải các ẩn chuyển vị.</p>
-        <h3>1. Làm lại phép thế trên phần tử thanh hai nút</h3>
-        <p>Với phần tử thanh \([x_i,x_{i+1}]\), đặt \(N_1=N_i,\ N_2=N_{i+1}\). Viết <strong>cả hai hàm</strong> dưới dạng tổng, thay vì chọn ngay \(v_h=N_1\) hoặc \(v_h=N_2\):</p>
-        <div class="eq">\[
-          u_h^e=N_1u_1+N_2u_2=\sum_{B=1}^{2}N_Bu_B,\qquad
-          v_h^e=N_1c_1+N_2c_2=\sum_{A=1}^{2}N_Ac_A.
+          u_h'=\mathbf B\mathbf u^e,\qquad
+          v_h'=\mathbf B\mathbf v^e,\qquad
+          (v_h')^{\mathsf T}=(\mathbf B\mathbf v^e)^{\mathsf T}
+                =(\mathbf v^e)^{\mathsf T}\mathbf B^{\mathsf T}.
         \]</div>
-        <p>Ở đây \(u_B\) là chuyển vị nút cần tìm, còn \(c_A\) là hệ số của hàm kiểm tra. Để tập trung vào phép biến đổi, xét tải phân bố \(q\) và chưa có lực tập trung ở biên. Thế vào đóng góp dạng yếu của phần tử thanh:</p>
+        <p>Để tập trung vào phép biến đổi, xét tải phân bố \(q\) và chưa có lực tập trung ở biên. Thế vào đóng góp dạng yếu của phần tử thanh; các véc-tơ bậc tự do không phụ thuộc \(x\), nên được đưa ra ngoài tích phân:</p>
         <div class="eq">\[\begin{aligned}
           R_e(v_h)
-          &=\int_e EA\,u_h'v_h'\,dx-\int_e qv_h\,dx\\
-          &=\int_e EA
-             \left(\sum_{B=1}^2N_B'u_B\right)
-             \left(\sum_{A=1}^2N_A'c_A\right)dx
-             -\int_e q\left(\sum_{A=1}^2N_Ac_A\right)dx\\
-          &=\sum_{A=1}^2c_A
-             \left[
-               \sum_{B=1}^2
-               \underbrace{\left(\int_e EA\,N_A'N_B'\,dx\right)}_{(K_e)_{AB}}u_B
-               -\underbrace{\int_e qN_A\,dx}_{(f_e)_A}
-             \right].
+          &=\int_e EA\,v_h'u_h'\,dx-\int_e qv_h\,dx\\
+          &=\int_e EA\,(\mathbf v^e)^{\mathsf T}
+                         \mathbf B^{\mathsf T}\mathbf B\mathbf u^e\,dx
+             -\int_e q\,(\mathbf v^e)^{\mathsf T}\mathbf N^{\mathsf T}\,dx\\
+          &=(\mathbf v^e)^{\mathsf T}
+             \underbrace{\left(\int_e EA\,\mathbf B^{\mathsf T}\mathbf B\,dx\right)}_{\mathbf K^e}
+             \mathbf u^e
+             -(\mathbf v^e)^{\mathsf T}
+             \underbrace{\left(\int_e q\,\mathbf N^{\mathsf T}\,dx\right)}_{\mathbf f^e}\\
+          &=(\mathbf v^e)^{\mathsf T}(\mathbf K^e\mathbf u^e-\mathbf f^e).
         \end{aligned}\]</div>
-        <p>Viết hết hai hệ số \(c_1,c_2\) sẽ thấy ngay hai hàng của <em>véc-tơ đóng góp phần tử</em>:</p>
-        <div class="eq">\[
-          R_e(v_h)
-          =c_1\bigl[(K_e)_{11}u_1+(K_e)_{12}u_2-(f_e)_1\bigr]
-          +c_2\bigl[(K_e)_{21}u_1+(K_e)_{22}u_2-(f_e)_2\bigr]
-          =\mathbf c_e^{\mathsf T}(\mathbf K_e\mathbf u_e-\mathbf f_e).
-        \]</div>
-        <div class="callout"><strong>Chú ý quan trọng:</strong> \(R_e(v_h)\) là <em>đóng góp</em> của phần tử vào phương trình toàn cục. Các hệ số kiểm tra ở nút chung của hai phần tử là cùng một hệ số, nên không được kết luận \(\mathbf K_e\mathbf u_e=\mathbf f_e\) riêng cho từng phần tử. Phải cộng đóng góp rồi mới dùng tính tùy ý của hàm kiểm tra để lấy các hàng phương trình toàn cục.</div>
+        <p><strong>Đây là công thức độ cứng phần tử thanh trong slide</strong>, thu được mà không cần lấy riêng \(v_h=N_1\) rồi \(v_h=N_2\). Kích thước: \(\mathbf N,\mathbf B\) là hàng \(1\times2\); \(\mathbf K^e\) là \(2\times2\); \(\mathbf f^e,\mathbf u^e,\mathbf v^e\) là cột \(2\times1\). Do đó toàn bộ \(R_e(v_h)\) là một số vô hướng.</p>
+        <div class="callout"><strong>Chưa được đặt \(R_e(v_h)=0\) riêng từng phần tử.</strong> \(\mathbf v^e\) ở nút chung liên hệ với hàm thử của phần tử kề bên. Ta phải cộng mọi \(R_e\), rồi mới dùng tính tùy ý của các bậc tự do hàm thử <em>toàn cục</em> để suy ra các hàng phương trình.</div>
 
-        <h3>2. Áp đúng phép biến đổi ấy cho dầm Hermite</h3>
-        <p>Dạng yếu của dầm dùng đạo hàm bậc <strong>hai</strong> thay vì bậc một. Mỗi phần tử có bốn hàm dạng và bốn bậc tự do \(\mathbf d_e=[w_i,\theta_i,w_{i+1},\theta_{i+1}]^{\mathsf T}\). Hàm kiểm tra tổng quát trên phần tử được biểu diễn bằng cùng cơ sở Hermite:</p>
-        <div class="eq">\[\begin{aligned}
-          w_h|_e&=\sum_{B=1}^4N_B^e d_{e,B}
-                 =\mathbf N_e\mathbf d_e,\\
-          v_h|_e&=\sum_{A=1}^4N_A^e c_{e,A}
-                 =\mathbf N_e\mathbf c_e,\qquad
-          \mathbf c_e=[v_i,v_i',v_{i+1},v_{i+1}']^{\mathsf T}.
-        \end{aligned}\]</div>
-        <p>Vì \(w_h''=\sum_B(N_B^e)''d_{e,B}\) và \(v_h''=\sum_A(N_A^e)''c_{e,A}\), thay vào <strong>tích phân trên một phần tử</strong> và gom theo từng hệ số kiểm tra:</p>
+        <h3>2. Phần tử dầm Hermite: cùng phép chuyển vị, đạo hàm bậc hai</h3>
+        <p>Dạng yếu của dầm là \(\int EI\,w_h''v_h''=\int q_0v_h\). Phần tử Hermite có bốn hàm dạng \(N_1,\ldots,N_4\) và bốn bậc tự do. Ký hiệu \(\mathbf d_e\) cho véc-tơ ẩn đã dùng ở mục 4; véc-tơ bậc tự do của hàm thử là \(\mathbf v^e\):</p>
+        <div class="eq">\[\begin{gathered}
+          \mathbf N_e=[\,N_1\;\;N_2\;\;N_3\;\;N_4\,],\qquad
+          \mathbf d_e=\begin{bmatrix}w_i\\\theta_i\\w_{i+1}\\\theta_{i+1}\end{bmatrix},\qquad
+          \mathbf v^e=\begin{bmatrix}v_i\\\varphi_i\\v_{i+1}\\\varphi_{i+1}\end{bmatrix},
+          \quad\varphi_i=v_h'(x_i),\\
+          w_h|_e=\mathbf N_e\mathbf d_e,\qquad
+          v_h|_e=\mathbf N_e\mathbf v^e,\qquad
+          \mathbf B_e=\mathbf N_e''.
+        \end{gathered}\]</div>
+        <p>Suy ra \(w_h''=\mathbf B_e\mathbf d_e\), \(v_h''=\mathbf B_e\mathbf v^e\), và vì \(v_h''\) là vô hướng,
+          \(v_h''=(\mathbf v^e)^{\mathsf T}\mathbf B_e^{\mathsf T}\).
+          Lặp lại đúng các bước của phần tử thanh:</p>
         <div class="eq">\[\begin{aligned}
           R_e(v_h)
-          &=\int_e EI\,w_h''v_h''\,dx-\int_e q_0v_h\,dx\\
-          &=\int_e EI
-             \left(\sum_{B=1}^4(N_B^e)''d_{e,B}\right)
-             \left(\sum_{A=1}^4(N_A^e)''c_{e,A}\right)dx
-             -\int_e q_0\sum_{A=1}^4N_A^ec_{e,A}\,dx\\
-          &=\sum_{A=1}^4c_{e,A}
-             \left[
-               \sum_{B=1}^4
-                 \underbrace{\left(\int_e EI\,(N_A^e)''(N_B^e)''\,dx\right)}_{(K_e)_{AB}}
-                 d_{e,B}
-               -\underbrace{\int_e q_0N_A^e\,dx}_{(f_e)_A}
-             \right]\\
-          &=\mathbf c_e^{\mathsf T}(\mathbf K_e\mathbf d_e-\mathbf f_e).
+          &=\int_e EI\,v_h''w_h''\,dx-\int_e q_0v_h\,dx\\
+          &=\int_e EI\,(\mathbf v^e)^{\mathsf T}
+                         \mathbf B_e^{\mathsf T}\mathbf B_e\mathbf d_e\,dx
+            -\int_e q_0(\mathbf v^e)^{\mathsf T}\mathbf N_e^{\mathsf T}\,dx\\
+          &=(\mathbf v^e)^{\mathsf T}
+            \left[
+              \underbrace{\left(\int_e EI\,\mathbf B_e^{\mathsf T}\mathbf B_e\,dx\right)}_{\mathbf K_e}
+              \mathbf d_e
+              -
+              \underbrace{\left(\int_e q_0\,\mathbf N_e^{\mathsf T}\,dx\right)}_{\mathbf f_e}
+            \right].
         \end{aligned}\]</div>
-        <p>Đây là chính phép biến đổi của slide thanh: đổi \(EA\,N_A'N_B'\) thành \(EI\,(N_A^e)''(N_B^e)''\), và đổi hai hàm dạng thành bốn hàm Hermite. Viết gọn với \(\mathbf B_e=\mathbf N_e''\):</p>
-        <div class="eq">\[\boxed{
-          \mathbf K_e=\int_e EI\,\mathbf B_e^{\mathsf T}\mathbf B_e\,dx,\qquad
-          \mathbf f_e=\int_e q_0\,\mathbf N_e^{\mathsf T}\,dx.}
-        \]</div>
+        <p>Điểm thay đổi so với thanh là \(\mathbf B_e=\mathbf N_e''\) thay cho \(\mathbf B=\mathbf N'\), và véc-tơ phần tử có bốn thành phần thay vì hai. Các ô của ma trận và véc-tơ tương ứng là
+          \((K_e)_{AB}=\int_e EI\,N_A''N_B''\,dx\),
+          \((f_e)_A=\int_e q_0N_A\,dx\), với \(A,B=1,\ldots,4\).</p>
         <p>Với \(s=(x-x_i)/h\), \(dx=h\,ds\) và \(d/dx=h^{-1}d/ds\), ta có</p>
         <div class="eq">\[\mathbf B_e(s)=
           \left[\frac{-6+12s}{h^2},\;
                 \frac{-4+6s}{h},\;
                 \frac{6-12s}{h^2},\;
                 \frac{-2+6s}{h}\right].\]</div>
-        <p>Ví dụ, tính tường minh một ô của ma trận và một thành phần của véc-tơ tải:</p>
+        <p>Ví dụ, hai phép tích phân đầu tiên cho</p>
         <div class="eq">\[\begin{aligned}
           (K_e)_{11}
           &=EI\,h\int_0^1\frac{(-6+12s)^2}{h^4}\,ds
@@ -139,7 +135,7 @@ N_3&=3s^2-2s^3,&N_4&=h_e(-s^2+s^3).
           &=q_0h\int_0^1(1-3s^2+2s^3)\,ds
             =\frac{q_0h}{2}.
         \end{aligned}\]</div>
-        <p>Tính các ô còn lại theo đúng công thức tích phân trên, với \(EI,q_0\) không đổi trên phần tử, được</p>
+        <p>Tính các ô còn lại theo cùng công thức, với \(EI,q_0\) không đổi trên phần tử, được</p>
         <div class="eq">\[\boxed{\mathbf K_e=\frac{EI}{h^3}
           \begin{bmatrix}
           12&6h&-12&6h\\
@@ -149,21 +145,21 @@ N_3&=3s^2-2s^3,&N_4&=h_e(-s^2+s^3).
           \end{bmatrix},\qquad
           \mathbf f_e=\frac{q_0h}{12}
           \begin{bmatrix}6\\h\\6\\-h\end{bmatrix}.}\]</div>
-        <p>Kiểm tra \(K_e=K_e^{\mathsf T}\). Ở <a href="#he-toan-cuc">mục tiếp theo</a>, ta cộng các đóng góp \(R_e(v_h)\) rồi mới suy ra hệ phương trình từ tính tùy ý của các hệ số \(c_j\) toàn cục.</p>
+        <p>Kiểm tra \(K_e=K_e^{\mathsf T}\). <a href="#he-toan-cuc">Mục tiếp theo</a> cộng các đóng góp phần tử và suy ra hệ đại số từ hàm thử tổng quát.</p>
       </section>
 
       <section class="panel" id="he-toan-cuc">
         <p class="kicker">06 · Từ phần tử sang toàn dầm</p>
         <h2>Lắp ghép, chọn hàm thử và áp điều kiện biên</h2>
-        <p><strong>Bước 4 — Ánh xạ về bậc tự do toàn cục.</strong> Với \(n\) phần tử, đặt
+        <p><strong>Bước 3 — Ánh xạ về bậc tự do toàn cục.</strong> Với \(n\) phần tử, đặt
           \(\mathbf d=[w_0,\theta_0,w_1,\theta_1,\ldots,w_n,\theta_n]^{\mathsf T}\)
-          và tương tự \(\mathbf c\) cho hàm thử. Nếu phần tử \(e\) nối nút \(e\) và \(e+1\), bốn chỉ số của nó là
+          và \(\mathbf v=[v_0,\varphi_0,v_1,\varphi_1,\ldots,v_n,\varphi_n]^{\mathsf T}\) cho hàm thử, với \(v_i=v_h(x_i)\), \(\varphi_i=v_h'(x_i)\). Nếu phần tử \(e\) nối nút \(e\) và \(e+1\), bốn chỉ số của nó là
           \([2e,2e+1,2e+2,2e+3]\) khi bắt đầu đếm từ 0.
           Gọi \(\mathbf A_e\) là ma trận chọn bậc tự do, kích thước \(4\times 2(n+1)\), sao cho
-          \(\mathbf d_e=\mathbf A_e\mathbf d\) và \(\mathbf c_e=\mathbf A_e\mathbf c\).</p>
+          \(\mathbf d_e=\mathbf A_e\mathbf d\) và \(\mathbf v^e=\mathbf A_e\mathbf v\).</p>
         <div class="eq">\[\begin{aligned}
-          0&=\sum_e\mathbf c_e^{\mathsf T}(\mathbf K_e\mathbf d_e-\mathbf f_e)\\
-           &=\mathbf c^{\mathsf T}
+          0&=\sum_e(\mathbf v^e)^{\mathsf T}(\mathbf K_e\mathbf d_e-\mathbf f_e)\\
+           &=\mathbf v^{\mathsf T}
              \left[\left(\sum_e\mathbf A_e^{\mathsf T}\mathbf K_e\mathbf A_e\right)\mathbf d
                     -\sum_e\mathbf A_e^{\mathsf T}\mathbf f_e\right].
         \end{aligned}\]</div>
@@ -186,10 +182,10 @@ N_3&=3s^2-2s^3,&N_4&=h_e(-s^2+s^3).
           \(K_{w_1w_1}=96+96=192\) và \(f_{w_1}=1/4+1/4=1/2\); bậc tự do \(\theta_1\) nhận
           \(K_{\theta_1\theta_1}=8+8=16\) và \(f_{\theta_1}=-1/48+1/48=0\).
           Đây là phép cộng cụ thể tại nút chung.</p>
-        <p><strong>Bước 5 — Từ “mọi hàm thử” đến các hàng phương trình.</strong> Ở gối tựa, \(w_0=w_n=0\) và hàm thử cũng phải có \(v_0=v_n=0\). Các hệ số thử còn lại \(c_j\) tùy ý. Từ
-          \(\mathbf c^{\mathsf T}(\mathbf K\mathbf d-\mathbf f)=0\) với mọi \(\mathbf c\) hợp lệ, ta được
+        <p><strong>Bước 4 — Từ “mọi hàm thử” đến các hàng phương trình.</strong> Ở gối tựa, \(w_0=w_n=0\) và hàm thử cũng phải có \(v_0=v_n=0\). Các thành phần còn lại của \(\mathbf v\) tùy ý. Từ
+          \(\mathbf v^{\mathsf T}(\mathbf K\mathbf d-\mathbf f)=0\) với mọi \(\mathbf v\) hợp lệ, ta được
           \((\mathbf K\mathbf d-\mathbf f)_j=0\) tại <em>mỗi bậc tự do tự do</em> \(j\).
-          Chọn riêng \(c_j=1\), các hệ số thử tự do khác bằng 0, chính là lấy một hàm cơ sở toàn cục làm hàm thử để viết hàng \(j\). Các hàng tại \(w_0,w_n\) không dùng để giải chuyển vị; sau khi giải có thể dùng chúng để tính phản lực gối.</p>
+          Chọn riêng \((\mathbf v)_j=1\), các thành phần thử tự do khác bằng 0, chính là lấy một hàm cơ sở toàn cục làm hàm thử để viết hàng \(j\). Các hàng tại \(w_0,w_n\) không dùng để giải chuyển vị; sau khi giải có thể dùng chúng để tính phản lực gối.</p>
         <div class="eq">\[\boxed{\mathbf K_{ff}\mathbf d_f
           =\mathbf f_f-\mathbf K_{fc}\mathbf d_c,\qquad
           \mathbf d_c=\mathbf0\ \Longrightarrow
