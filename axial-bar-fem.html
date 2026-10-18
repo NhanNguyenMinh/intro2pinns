@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Bài toán thanh chịu kéo 1D: dạng mạnh, dạng yếu, ma trận phần tử, lắp ghép Ku=F, tải, chuyển vị cho trước và phản lực gối.">
+  <title>Từ thanh chịu kéo đến hệ FEM Ku = F · intro2pinns</title>
+  <style>
+    :root{--ink:#102a3a;--muted:#526473;--teal:#087e83;--gold:#d99c43;--paper:#f7f8f6;--line:#d9e2e4;--pale:#e7f4f2}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.7 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}a{color:#076b72}a:focus-visible{outline:3px solid var(--gold);outline-offset:3px}.wrap{width:min(1160px,calc(100% - 36px));margin:auto}
+    .topbar{background:var(--ink);color:#fff}.topbar .wrap{min-height:64px;display:flex;justify-content:space-between;align-items:center;gap:20px}.brand{color:#fff;text-decoration:none;font-weight:850}.brand span{color:#9be0d8}.topbar nav{display:flex;gap:8px 18px;flex-wrap:wrap}.topbar nav a{color:#dcebed;text-decoration:none;font-size:.9rem}
+    .hero{background:radial-gradient(circle at 85% 20%,#1f6a73,transparent 36%),linear-gradient(135deg,#102a3a,#163c4a);color:#fff}.hero .wrap{padding:64px 0 69px}.eyebrow{color:#9be0d8;text-transform:uppercase;letter-spacing:.14em;font-size:.76rem;font-weight:850;margin:0 0 13px}.hero h1{font-size:clamp(2.1rem,4.7vw,4.1rem);line-height:1.1;letter-spacing:-.04em;max-width:870px;margin:0 0 17px}.hero p{color:#dcebed;font-size:1.05rem;max-width:760px;margin:0}
+    .layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:28px;padding:36px 0 75px}.toc{position:sticky;top:17px;align-self:start;background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px}.toc strong{display:block;color:var(--teal);font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}.toc a{display:block;padding:7px 0;border-top:1px solid #edf1f1;color:var(--muted);text-decoration:none;font-size:.9rem}.toc a:hover{color:var(--teal)}.content{min-width:0}.panel{background:#fff;border:1px solid var(--line);border-radius:17px;padding:28px 33px;margin-bottom:18px;scroll-margin-top:16px}.kicker{color:var(--teal);font-size:.76rem;text-transform:uppercase;letter-spacing:.12em;font-weight:850;margin:0 0 7px}h2{font-size:clamp(1.6rem,3vw,2.25rem);line-height:1.18;letter-spacing:-.03em;margin:0 0 14px}h3{font-size:1.12rem;margin:22px 0 7px}p{margin:0 0 15px}.lead{font-size:1.05rem;color:var(--muted)}.eq{background:#f5f9f8;border:1px solid #d6e7e4;border-radius:12px;padding:13px 17px;margin:16px 0;overflow-x:auto}.eq mjx-container[display="true"]{margin:.45em 0!important}.callout{border-left:4px solid var(--teal);background:#e6f4f1;border-radius:0 10px 10px 0;padding:15px 18px;margin:19px 0}.callout.gold{border-color:var(--gold);background:#fff4e4}.diagram{background:#f8fbfa;border:1px solid var(--line);border-radius:13px;padding:14px;margin:19px 0}.diagram svg{display:block;width:100%;height:auto}.diagram figcaption{text-align:center;color:var(--muted);font-size:.84rem;margin-top:7px}.table-wrap{overflow-x:auto}.table{width:100%;min-width:530px;border-collapse:collapse}.table th,.table td{padding:10px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.table th{background:#eef6f4;font-size:.82rem}.steps{padding-left:22px}.steps li{margin:9px 0}.links{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}.button{display:inline-flex;padding:9px 14px;border-radius:9px;background:var(--teal);color:#fff;text-decoration:none;font-size:.9rem;font-weight:750}.button.ghost{background:#fff;border:1px solid var(--teal);color:var(--teal)}.footer{background:var(--ink);color:#dcebed;padding:27px 0}.footer .wrap{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}.footer a{color:#9bddda}.footer p{font-size:.87rem;margin:0}
+    @media(max-width:900px){.layout{grid-template-columns:1fr}.toc{position:static;display:flex;flex-wrap:wrap;gap:0 15px}.toc strong{width:100%}.toc a{border:0;padding:4px 0}}@media(max-width:650px){.wrap{width:min(100% - 26px,1160px)}.topbar .wrap{padding:13px 0;align-items:flex-start;flex-direction:column;gap:8px}.hero .wrap{padding:53px 0}.panel{padding:21px}.layout{padding-top:20px}}@media print{.topbar,.toc,.footer,.links{display:none}.layout{display:block;padding:0}.panel{break-inside:avoid;border:0;border-bottom:1px solid #ddd;padding:14px 0}.hero{background:none;color:#111}.hero p,.eyebrow{color:#333}}
+  </style>
+  <script>window.MathJax={tex:{tags:"none"},options:{skipHtmlTags:["script","noscript","style","textarea","pre","code"]}};</script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body>
+  <header class="topbar"><div class="wrap"><a class="brand" href="index.html">intro<span>2</span>pinns</a><nav aria-label="Điều hướng"><a href="index.html">Trang chủ</a><a href="method-fem.html">Lộ trình FEM</a><a href="beam-fem-foundations.html">FEM cho dầm</a><a href="learn-python/03-linear-fem.html">Thực hành Python</a></nav></div></header>
+  <div class="hero"><div class="wrap"><p class="eyebrow">Bài đọc nền · FEM một chiều</p><h1>Từ thanh chịu kéo đến hệ lớn \(\mathbf K\mathbf u=\mathbf F\)</h1><p>Một ví dụ hai phần tử, đủ để thấy ma trận phần tử ghép vào hệ toàn cục thế nào và điều kiện biên tải, chuyển vị, phản lực được xử lý ở đâu.</p></div></div>
+  <main class="wrap layout">
+    <aside class="toc" aria-label="Mục lục"><strong>Đi theo thứ tự</strong><a href="#bai-toan">1 · Bài toán và quy ước</a><a href="#dang-yeu">2 · Dạng yếu và điều kiện biên</a><a href="#phan-tu">3 · Ma trận phần tử</a><a href="#lap-ghep">4 · Lắp ghép toàn cục</a><a href="#dieu-kien-bien">5 · Áp chuyển vị và phản lực</a><a href="#kiem-chung">6 · Kiểm chứng nghiệm</a><a href="#tu-lam">7 · Bài tập tự làm</a></aside>
+    <div class="content">
+      <section class="panel" id="bai-toan"><p class="kicker">01 · Cùng một ví dụ xuyên suốt</p><h2>Thanh đàn hồi chịu tải dọc trục</h2><p class="lead">Thanh dài \(L\), độ cứng dọc \(EA&gt;0\), tải phân bố \(q(x)\) và lực tập trung \(P\) ở đầu phải. Chuyển vị \(u(x)\), tải \(q\) và \(P\) dương theo chiều \(+x\). Đầu trái được giữ tại chuyển vị \(u(0)=g\) (ví dụ chính lấy \(g=0\)).</p>
+        <figure class="diagram"><svg viewBox="0 0 800 210" role="img" aria-label="Thanh nằm ngang: đầu trái gắn tường, tải phân bố q hướng phải và lực đầu mút P hướng phải"><defs><marker id="arrow-bar" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#b6782d"/></marker></defs><path d="M72 59v104M58 62l14 14M58 82l14 14M58 102l14 14M58 122l14 14M58 142l14 14" stroke="#102a3a" stroke-width="2"/><rect x="74" y="89" width="575" height="48" rx="5" fill="#bfe4df" stroke="#087e83" stroke-width="3"/><g stroke="#b6782d" stroke-width="2.5" marker-end="url(#arrow-bar)"><path d="M150 65h55"/><path d="M265 65h55"/><path d="M380 65h55"/><path d="M495 65h55"/><path d="M648 112h86"/></g><g fill="#102a3a" font-family="system-ui" font-size="17"><text x="365" y="43" text-anchor="middle">q(x) &gt; 0</text><text x="742" y="105">P</text><text x="79" y="184">x = 0</text><text x="610" y="184">x = L</text><text x="347" y="184">u(x) dương sang phải</text></g></svg><figcaption>Lực dọc trong thanh \(N(x)=EA\,u'(x)\); lực đầu mút \(P\) là tải biên, không phải điều kiện chuyển vị.</figcaption></figure>
+        <p>Cân bằng trên một đoạn nhỏ cho \(-N'=q\). Với \(N=EAu'\), <strong>dạng mạnh</strong> cùng điều kiện biên là</p>
+        <div class="eq">\[\boxed{-\bigl(EA\,u'(x)\bigr)'=q(x),\quad 0&lt;x&lt;L;\qquad u(0)=g,\quad EA\,u'(L)=P.}\]</div>
+        <div class="callout"><strong>Hai loại điều kiện biên:</strong> \(u(0)=g\) là chuyển vị cho trước (Dirichlet/thiết yếu); \(EAu'(L)=P\) là lực cho trước (Neumann/tự nhiên). Phản lực tại đầu trái là kết quả sau khi giải, chưa phải dữ liệu đầu vào.</div>
+      </section>
+
+      <section class="panel" id="dang-yeu"><p class="kicker">02 · Trước khi chia lưới</p><h2>Dạng yếu chứa lực ở đầu phải</h2><p>Lấy hàm thử \(v\in V_0=\{v\in H^1(0,L):v(0)=0\}\). Nhân dạng mạnh với \(v\) rồi tích phân từng phần một lần:</p>
+        <div class="eq">\[\begin{aligned}\int_0^L-(EAu')'v\,dx
+          &=\int_0^L EAu'v'\,dx-\bigl[EAu'v\bigr]_0^L\\
+          &=\int_0^Lqv\,dx.
+          \end{aligned}\]</div>
+        <p>Vì \(v(0)=0\) và \(EAu'(L)=P\), hạng biên trở thành \(Pv(L)\). <strong>Dạng yếu:</strong> tìm \(u\in V_g=\{z\in H^1(0,L):z(0)=g\}\) sao cho</p>
+        <div class="eq">\[\boxed{\int_0^L EAu'v'\,dx
+          =\int_0^Lqv\,dx+Pv(L)
+          \qquad\forall v\in V_0.}\]</div>
+        <p>Điều kiện \(g\) đi vào <em>không gian nghiệm</em>; tải phân bố \(q\) đi vào tích phân trên miền; lực \(P\) xuất hiện như <em>công biên</em>. Ba dữ liệu này vì thế được xử lý ở ba bước khác nhau của FEM.</p>
+      </section>
+
+      <section class="panel" id="phan-tu"><p class="kicker">03 · Phần tử hai nút</p><h2>Hàm dạng, \(\mathbf K^e\) và \(\mathbf f^e\)</h2><p>Chia \([0,L]\) thành các phần tử \(e=[x_i,x_{i+1}]\), \(h_e=x_{i+1}-x_i\), \(s=(x-x_i)/h_e\). Với nội suy tuyến tính \(N_1=1-s,\ N_2=s\):</p>
+        <div class="eq">\[\begin{gathered}
+          \mathbf N=[N_1\;\;N_2],\quad
+          \mathbf B=\mathbf N'=\left[-\frac1{h_e}\;\;\frac1{h_e}\right],\\
+          \mathbf u^e=\begin{bmatrix}u_i\\u_{i+1}\end{bmatrix},\quad
+          \mathbf v^e=\begin{bmatrix}v_i\\v_{i+1}\end{bmatrix},\quad
+          u_h|_e=\mathbf N\mathbf u^e,\quad v_h|_e=\mathbf N\mathbf v^e.
+          \end{gathered}\]</div>
+        <p>Thế vào dạng yếu trên phần tử. Do \((\mathbf B\mathbf v^e)^{\mathsf T}=(\mathbf v^e)^{\mathsf T}\mathbf B^{\mathsf T}\), đưa các véc-tơ nút ra ngoài tích phân:</p>
+        <div class="eq">\[\begin{aligned}
+          \int_e EA\,u_h'v_h'\,dx-\int_e qv_h\,dx
+          &=(\mathbf v^e)^{\mathsf T}
+            \left[\underbrace{\left(\int_e EA\,\mathbf B^{\mathsf T}\mathbf B\,dx\right)}_{\mathbf K^e}
+                  \mathbf u^e-
+                  \underbrace{\left(\int_e q\,\mathbf N^{\mathsf T}\,dx\right)}_{\mathbf f_q^e}
+            \right].
+          \end{aligned}\]</div>
+        <p>Nếu \(EA\) và \(q\) không đổi trên phần tử, tích phân cho</p>
+        <div class="eq">\[\boxed{\mathbf K^e=\frac{EA}{h_e}
+          \begin{bmatrix}1&-1\\-1&1\end{bmatrix},\qquad
+          \mathbf f_q^e=\frac{qh_e}{2}\begin{bmatrix}1\\1\end{bmatrix}.}\]</div>
+        <p>\(\mathbf K^e\) tác động lên chuyển vị; \(\mathbf f_q^e\) biểu diễn tải <em>phân bố</em> thành hai lực nút tương đương. Lực tập trung \(P\) ở đầu phải chưa nằm trong tích phân này: nó được cộng đúng một lần vào thành phần \(F_n\) của véc-tơ toàn cục.</p>
+        <div class="callout gold"><strong>Đừng giải \(\mathbf K^e\mathbf u^e=\mathbf f_q^e\) riêng từng phần tử.</strong> Các phần tử dùng chung chuyển vị ở nút nối; chỉ tổng các đóng góp mới cho phương trình cân bằng tại nút đó.</div>
+      </section>
+
+      <section class="panel" id="lap-ghep"><p class="kicker">04 · Thấy rõ phép cộng</p><h2>Hai phần tử tạo hệ toàn cục \(\mathbf K\mathbf u=\mathbf F\)</h2><p>Chọn số liệu \(L=2,\ EA=2,\ q=1,\ P=3,\ g=0\). Chia thanh thành hai phần tử dài \(h=1\), với các nút \(x_0=0,\ x_1=1,\ x_2=2\). Mỗi phần tử có</p>
+        <div class="eq">\[\mathbf K^0=\mathbf K^1=
+          \begin{bmatrix}2&-2\\-2&2\end{bmatrix},\qquad
+          \mathbf f_q^0=\mathbf f_q^1=
+          \begin{bmatrix}1/2\\1/2\end{bmatrix}.\]</div>
+        <figure class="diagram"><svg viewBox="0 0 800 195" role="img" aria-label="Hai phần tử thanh: phần tử 0 nối nút 0 và 1; phần tử 1 nối nút 1 và 2; nút 1 dùng chung"><path d="M90 63H710" stroke="#087e83" stroke-width="9" stroke-linecap="round"/><g fill="#102a3a"><circle cx="90" cy="63" r="9"/><circle cx="400" cy="63" r="9"/><circle cx="710" cy="63" r="9"/></g><g font-family="system-ui" text-anchor="middle"><text x="90" y="38" fill="#102a3a" font-size="17">nút 0</text><text x="400" y="38" fill="#102a3a" font-size="17">nút 1 dùng chung</text><text x="710" y="38" fill="#102a3a" font-size="17">nút 2</text><text x="245" y="91" fill="#087e83" font-size="17">phần tử 0</text><text x="555" y="91" fill="#087e83" font-size="17">phần tử 1</text></g><rect x="78" y="116" width="275" height="45" rx="9" fill="#e7f4f2"/><rect x="446" y="116" width="275" height="45" rx="9" fill="#fff4e4"/><text x="215" y="145" text-anchor="middle" fill="#087e83" font-family="system-ui" font-size="18">u⁰ = [u₀, u₁]ᵀ</text><text x="583" y="145" text-anchor="middle" fill="#9b5e1f" font-family="system-ui" font-size="18">u¹ = [u₁, u₂]ᵀ</text><text x="400" y="186" text-anchor="middle" fill="#526473" font-family="system-ui" font-size="15">Hai ma trận phần tử cùng góp vào hàng và cột của nút 1.</text></svg><figcaption>Nút 1 có một chuyển vị \(u_1\), nên đóng góp từ hai phần tử được cộng vào cùng hàng/cột.</figcaption></figure>
+        <p>Đặt \(\mathbf u=[u_0,u_1,u_2]^{\mathsf T}\). Viết hai ma trận \(2\times2\) vào các chỉ số toàn cục \([0,1]\) và \([1,2]\); các vị trí trùng nhau được cộng:</p>
+        <div class="eq">\[\mathbf K=
+          \underbrace{\begin{bmatrix}2&-2&0\\-2&2&0\\0&0&0\end{bmatrix}}_{\text{phần tử 0}}
+          +\underbrace{\begin{bmatrix}0&0&0\\0&2&-2\\0&-2&2\end{bmatrix}}_{\text{phần tử 1}}
+          =\boxed{\begin{bmatrix}2&-2&0\\-2&4&-2\\0&-2&2\end{bmatrix}}.\]</div>
+        <p>Đối với tải, cộng hai véc-tơ tải phân bố rồi cộng lực đầu mút \(P\) tại nút 2:</p>
+        <div class="eq">\[\mathbf F_q=
+          \begin{bmatrix}1/2\\1/2\\0\end{bmatrix}
+          +\begin{bmatrix}0\\1/2\\1/2\end{bmatrix}
+          =\begin{bmatrix}1/2\\1\\1/2\end{bmatrix},\quad
+          \mathbf F_P=\begin{bmatrix}0\\0\\3\end{bmatrix},\quad
+          \boxed{\mathbf F=\mathbf F_q+\mathbf F_P=
+          \begin{bmatrix}1/2\\1\\7/2\end{bmatrix}.}\]</div>
+        <p>Chẳng hạn, \(K_{11}=2+2=4\) và \(F_1=1/2+1/2=1\). Đây chính là phép lắp ghép. Với lưới bất kỳ, nếu \(\mathbf A_e\) chọn hai bậc tự do của phần tử từ véc-tơ toàn cục, công thức chung là</p>
+        <div class="eq">\[\mathbf K=\sum_e\mathbf A_e^{\mathsf T}\mathbf K^e\mathbf A_e,\qquad
+          \mathbf F=\sum_e\mathbf A_e^{\mathsf T}\mathbf f_q^e+\mathbf F_P.\]</div>
+        <div class="callout"><strong>Điểm tinh tế:</strong> trước khi áp \(u_0=g\), \(\mathbf K\) là ma trận lắp ghép và \(\mathbf F\) là tải đã biết. Đẳng thức \(\mathbf K\mathbf u=\mathbf F\) được áp trên các <em>bậc tự do tự do</em>; hàng tại nút bị giữ có thêm phản lực chưa biết.</div>
+      </section>
+
+      <section class="panel" id="dieu-kien-bien"><p class="kicker">05 · Áp điều kiện biên đúng chỗ</p><h2>Chuyển vị cho trước, lực cho trước và phản lực</h2><div class="table-wrap"><table class="table"><thead><tr><th>Dữ liệu</th><th>Đặt vào đâu?</th><th>Trong ví dụ</th></tr></thead><tbody><tr><td>Tải phân bố \(q\)</td><td>Tích phân \(\mathbf f_q^e=\int_e q\mathbf N^{\mathsf T}dx\), rồi lắp ghép.</td><td>\(\mathbf F_q=[1/2,1,1/2]^{\mathsf T}\)</td></tr><tr><td>Lực đầu mút \(P\)</td><td>Cộng một lần vào thành phần tải của bậc tự do tại đầu phải.</td><td>\(\mathbf F_P=[0,0,3]^{\mathsf T}\)</td></tr><tr><td>Chuyển vị \(u_0=g\)</td><td>Đặt vào nhóm bậc tự do đã biết; giải hệ rút gọn cho các bậc tự do còn lại.</td><td>\(u_0=0\)</td></tr><tr><td>Phản lực \(R_0\)</td><td>Tính sau khi có nghiệm: \(R_0=(\mathbf K\mathbf u-\mathbf F)_0\).</td><td>\(R_0=-5\)</td></tr></tbody></table></div>
+        <p>Chia các chỉ số thành nhóm <em>tự do</em> \(f=\{1,2\}\) và <em>chuyển vị đã biết</em> \(c=\{0\}\). Từ cân bằng trên các hàng tự do:</p>
+        <div class="eq">\[\boxed{\mathbf K_{ff}\mathbf u_f=
+          \mathbf F_f-\mathbf K_{fc}\mathbf u_c.}\]</div>
+        <p>Với \(g=0\), hệ cần giải là</p>
+        <div class="eq">\[\begin{bmatrix}4&-2\\-2&2\end{bmatrix}
+          \begin{bmatrix}u_1\\u_2\end{bmatrix}
+          =\begin{bmatrix}1\\7/2\end{bmatrix}
+          \quad\Longrightarrow\quad
+          \boxed{u_1=\frac94,\qquad u_2=4.}\]</div>
+        <p>Khôi phục \(\mathbf u=[0,9/4,4]^{\mathsf T}\). Hàng số 0 của hệ lắp ghép cho phản lực:</p>
+        <div class="eq">\[R_0=(\mathbf K\mathbf u-\mathbf F)_0
+          =\left(2u_0-2u_1\right)-\frac12
+          =-5.\]</div>
+        <p>Dấu âm nghĩa là gối tác dụng lực sang trái. Kiểm tra cân bằng toàn thanh: \(R_0+qL+P=-5+2+3=0\). Nếu \(g\ne0\), số hạng \(-\mathbf K_{fc}\mathbf u_c\) ở vế phải <strong>không được bỏ</strong>; ví dụ \(g=1/5\) sẽ cho \(u_1=49/20,\ u_2=21/5\), còn phản lực vẫn bằng \(-5\).</p>
+        <div class="callout gold"><strong>Vì sao không chỉ đặt \(u_0=0\) trong véc-tơ tải?</strong> Chuyển vị cho trước là ràng buộc lên nghiệm, không phải lực. Cách tách \(f/c\) giữ nguyên tính đối xứng của ma trận rút gọn và cho phản lực rõ ràng sau khi giải.</div>
+      </section>
+
+      <section class="panel" id="kiem-chung"><p class="kicker">06 · Kiểm tra không chỉ ở nút</p><h2>Nghiệm giải tích và nghiệm FEM khác nhau ở đâu?</h2><p>Với các số liệu trên, nghiệm đúng là \(u_*(x)=\tfrac52x-\tfrac14x^2\), vì \(-2u_*''=1,\ u_*(0)=0,\ 2u_*'(2)=3\). Nghiệm FEM tuyến tính trên hai phần tử là</p>
+        <div class="eq">\[u_h(x)=
+          \begin{cases}
+          \frac94x,&0\le x\le1,\\[2pt]
+          \frac94+\frac74(x-1),&1\le x\le2.
+          \end{cases}\]</div>
+        <p>Hai nghiệm trùng tại ba nút \(x=0,1,2\), nhưng tại \(x=1/2\), \(u_h=9/8\) còn \(u_*=19/16\). Lực dọc FEM là hằng số từng phần tử:
+          \(N_h=EAu_h'=9/2\) trên phần tử 0 và \(7/2\) trên phần tử 1; lực dọc chính xác \(N_*(x)=5-x\) thay đổi liên tục. Vì vậy hãy kiểm tra cả trong phần tử, không chỉ tại nút.</p>
+        <div class="links"><a class="button" href="beam-fem-foundations.html">Tiếp theo: dầm Euler–Bernoulli →</a><a class="button ghost" href="method-fem.html">Lộ trình FEM →</a></div>
+      </section>
+
+      <section class="panel" id="tu-lam"><p class="kicker">07 · Đọc để làm được việc</p><h2>Bốn bài tập ngắn</h2><ol class="steps"><li>Tự lắp lại \(\mathbf K\) và \(\mathbf F\) mà không nhìn đáp số; chỉ rõ hai đóng góp vào hàng nút 1.</li><li>Đổi \(g=1/5\); dùng \(\mathbf K_{ff}\mathbf u_f=\mathbf F_f-\mathbf K_{fc}g\), tính nghiệm và phản lực.</li><li>Đặt \(q=0\) nhưng giữ \(P=3\); dự đoán dạng nghiệm trước khi giải và so sánh với code.</li><li>Chia thanh thành 4 hoặc 8 phần tử; đo sai số ở các điểm giữa phần tử và giải thích vì sao nghiệm nút của bài toán này rất chính xác.</li></ol><p>Đối chiếu slide FEM thầy đã chia sẻ: trang 17–18 (hàm dạng), 19–20 (từ dạng yếu đến ma trận phần tử), 21–24 (lắp ghép và điều kiện biên). Sau bài thanh, <a href="beam-fem-foundations.html">bài dầm</a> dùng cùng quy trình nhưng cần hàm dạng Hermite \(C^1\) và đạo hàm bậc hai.</p></section>
+    </div>
+  </main>
+  <footer class="footer"><div class="wrap"><p><strong>intro2pinns</strong> · Từ dạng yếu đến hệ tuyến tính</p><p><a href="index.html">Trang chủ dự án</a> · <a href="beam-fem-foundations.html">Bài toán dầm</a></p></div></footer>
+</body>
+</html>
