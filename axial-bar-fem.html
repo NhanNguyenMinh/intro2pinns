@@ -82,39 +82,39 @@
           \(\mathbf v^0=[v_0,v_1]^{\mathsf T}\), \(\mathbf v^1=[v_1,v_2]^{\mathsf T}\).
           Hai phần tử <em>cùng dùng</em> \(u_1\) và \(v_1\) tại nút chung; đây là lý do các hệ số ở nút 1 phải cộng.</p>
         <figure class="diagram"><svg viewBox="0 0 800 195" role="img" aria-label="Hai phần tử thanh: phần tử 0 nối nút 0 và 1; phần tử 1 nối nút 1 và 2; nút 1 dùng chung"><path d="M90 63H710" stroke="#087e83" stroke-width="9" stroke-linecap="round"/><g fill="#102a3a"><circle cx="90" cy="63" r="9"/><circle cx="400" cy="63" r="9"/><circle cx="710" cy="63" r="9"/></g><g font-family="system-ui" text-anchor="middle"><text x="90" y="38" fill="#102a3a" font-size="17">nút 0</text><text x="400" y="38" fill="#102a3a" font-size="17">nút 1 dùng chung</text><text x="710" y="38" fill="#102a3a" font-size="17">nút 2</text><text x="245" y="91" fill="#087e83" font-size="17">phần tử 0</text><text x="555" y="91" fill="#087e83" font-size="17">phần tử 1</text></g><rect x="78" y="116" width="275" height="45" rx="9" fill="#e7f4f2"/><rect x="446" y="116" width="275" height="45" rx="9" fill="#fff4e4"/><text x="215" y="145" text-anchor="middle" fill="#087e83" font-family="system-ui" font-size="18">u⁰ = [u₀, u₁]ᵀ</text><text x="583" y="145" text-anchor="middle" fill="#9b5e1f" font-family="system-ui" font-size="18">u¹ = [u₁, u₂]ᵀ</text><text x="400" y="186" text-anchor="middle" fill="#526473" font-family="system-ui" font-size="15">Hai ma trận phần tử cùng góp vào hàng và cột của nút 1.</text></svg><figcaption>Nút 1 có một chuyển vị \(u_1\), nên đóng góp từ hai phần tử được cộng vào cùng hàng/cột.</figcaption></figure>
-        <h3>Gom theo hệ số của hàm thử tại từng nút</h3>
-        <p>Từ mục 3, đóng góp của mỗi phần tử là
-          \((\mathbf v^e)^{\mathsf T}(\mathbf K^e\mathbf u^e-\mathbf f_q^e)\).
-          Viết \(\mathbf r^e=\mathbf K^e\mathbf u^e-\mathbf f_q^e
-          =[r_1^e,r_2^e]^{\mathsf T}\). Khi cộng hai phần tử và lực đầu mút:</p>
+        <h3>Từ dạng yếu rời rạc đến hệ \(\mathbf K\mathbf u=\mathbf F\)</h3>
+        <p>Theo mục 3, trên phần tử \(e\), hai tích phân trong dạng yếu trở thành
+          \((\mathbf v^e)^{\mathsf T}\mathbf K^e\mathbf u^e\) và
+          \((\mathbf v^e)^{\mathsf T}\mathbf f_q^e\).
+          Với \(\mathbf u=[u_0,u_1,u_2]^{\mathsf T}\),
+          \(\mathbf v=[v_0,v_1,v_2]^{\mathsf T}\), thay hai phần tử vào dạng yếu:</p>
         <div class="eq">\[\begin{aligned}
-          0&=(\mathbf v^0)^{\mathsf T}\mathbf r^0
-             +(\mathbf v^1)^{\mathsf T}\mathbf r^1-Pv_2\\
-           &=v_0r_1^0+v_1r_2^0+v_1r_1^1+v_2r_2^1-Pv_2\\
-           &=v_0r_1^0
-             +v_1\underbrace{(r_2^0+r_1^1)}_{\text{hai phần tử cùng góp tại nút 1}}
-             +v_2(r_2^1-P).
+          (\mathbf v^0)^{\mathsf T}\mathbf K^0\mathbf u^0
+          +(\mathbf v^1)^{\mathsf T}\mathbf K^1\mathbf u^1
+          &=(\mathbf v^0)^{\mathsf T}\mathbf f_q^0
+           +(\mathbf v^1)^{\mathsf T}\mathbf f_q^1+Pv_2.
         \end{aligned}\]</div>
-        <p>Vì vậy hàng tại nút 1 phải gồm <strong>hàng thứ hai của phần tử 0 cộng hàng thứ nhất của phần tử 1</strong>. Tương tự, tải phân bố tại nút 1 là tổng thành phần thứ hai của phần tử 0 và thành phần thứ nhất của phần tử 1. Lực \(P\) chỉ xuất hiện ở hàng nút 2.</p>
-        <p>Viết tổng quát
-          \(\mathbf K^e=
-            \begin{bmatrix}k_{11}^e&k_{12}^e\\k_{21}^e&k_{22}^e\end{bmatrix}\)
-          và \(\mathbf f_q^e=[f_1^e,f_2^e]^{\mathsf T}\).
-          Gom các hệ số của \([u_0,u_1,u_2]^{\mathsf T}\) trong ba ngoặc trên cho ma trận và véc-tơ toàn cục:</p>
-        <div class="eq">\[\boxed{
-          \mathbf K=
-          \begin{bmatrix}
-          k_{11}^{0}&k_{12}^{0}&0\\
-          k_{21}^{0}&k_{22}^{0}+k_{11}^{1}&k_{12}^{1}\\
-          0&k_{21}^{1}&k_{22}^{1}
-          \end{bmatrix},\qquad
-          \mathbf F=
-          \begin{bmatrix}
-          f_1^{0}\\
-          f_2^{0}+f_1^{1}\\
-          f_2^{1}+P
-          \end{bmatrix}.}\]</div>
-        <p>Ô \(K_{11}=k_{22}^{0}+k_{11}^{1}\) và tải \(F_1=f_2^{0}+f_1^{1}\) là nơi nhìn thấy phép lắp ghép rõ nhất. Với \(u_0=g\) đã cho, \(v_0=0\); chỉ các hệ số thử \(v_1,v_2\) tùy ý, nên <em>hai hàng tự do</em> của \(\mathbf K\mathbf u-\mathbf F\) bằng 0. Hàng 0 cho phản lực sau khi giải.</p>
+        <p>Viết \(\mathbf K^e=\begin{bmatrix}k_{11}^e&k_{12}^e\\k_{21}^e&k_{22}^e\end{bmatrix}\)
+          và \(\mathbf f_q^e=[f_1^e,f_2^e]^{\mathsf T}\). Vì \(u_1,v_1\) dùng chung,
+          hai đóng góp ở nút 1 được đặt vào cùng ô rồi cộng. Khi đó phương trình trên viết thành</p>
+        <div class="eq">\[\underbrace{\begin{bmatrix}v_0&v_1&v_2\end{bmatrix}}_{\mathbf v^{\mathsf T}}
+          \underbrace{\begin{bmatrix}
+            k_{11}^{0}&k_{12}^{0}&0\\
+            k_{21}^{0}&k_{22}^{0}+k_{11}^{1}&k_{12}^{1}\\
+            0&k_{21}^{1}&k_{22}^{1}
+          \end{bmatrix}}_{\mathbf K}
+          \underbrace{\begin{bmatrix}u_0\\u_1\\u_2\end{bmatrix}}_{\mathbf u}
+          =\underbrace{\begin{bmatrix}v_0&v_1&v_2\end{bmatrix}}_{\mathbf v^{\mathsf T}}
+          \underbrace{\begin{bmatrix}f_1^0\\f_2^0+f_1^1\\f_2^1+P\end{bmatrix}}_{\mathbf F}.\]</div>
+        <p>Do đó ta thu được <strong>ma trận độ cứng và véc-tơ lực toàn cục</strong> trực tiếp từ \(\mathbf K^0,\mathbf K^1,\mathbf f_q^0,\mathbf f_q^1\):</p>
+        <div class="eq">\[\boxed{(\mathbf K\mathbf u)_f=\mathbf F_f,\qquad
+          \mathbf K=\begin{bmatrix}
+            k_{11}^{0}&k_{12}^{0}&0\\
+            k_{21}^{0}&k_{22}^{0}+k_{11}^{1}&k_{12}^{1}\\
+            0&k_{21}^{1}&k_{22}^{1}
+          \end{bmatrix},\quad
+          \mathbf F=\begin{bmatrix}f_1^0\\f_2^0+f_1^1\\f_2^1+P\end{bmatrix}.}\]</div>
+        <p>Đây là <em>hệ lắp ghép trên các hàng tự do</em>: \(\mathbf K\) và \(\mathbf F\) đã lắp ghép đầy đủ, còn \(u_0=g\) sẽ được đưa vào khi giải. Vì \(v_0=0\), hệ thường ký hiệu \(\mathbf K\mathbf u=\mathbf F\) được áp dụng cho hai hàng tự do (nút 1 và 2); hàng 0 dùng để tính phản lực sau khi có nghiệm. <a href="#dieu-kien-bien">Mục 5</a> thực hiện bước áp điều kiện biên này.</p>
 
         <h3>Thế số: nhìn thấy hai ma trận cộng vào một ma trận lớn</h3>
         <p>Chọn \(L=2,\ EA=2,\ q=1,\ P=3,\ g=0\), với hai phần tử đều dài \(h=1\). Mỗi phần tử có</p>
@@ -135,10 +135,6 @@
             +\underbrace{\begin{bmatrix}0\\0\\3\end{bmatrix}}_{\text{lực đầu mút }P}\\
           &=\boxed{\begin{bmatrix}1/2\\1\\7/2\end{bmatrix}}.
         \end{aligned}\]</div>
-        <div class="callout"><strong>Kết quả của dạng yếu:</strong> với nút 0 bị giữ, hệ sau lắp ghép thỏa
-          \(\mathbf K\mathbf u-\mathbf F=[R_0,0,0]^{\mathsf T}\).
-          Hai số 0 là phương trình cân bằng ở các nút tự do; \(R_0\) là phản lực ở gối.
-          <a href="#dieu-kien-bien">Mục 5</a> dùng \(u_0=g\) để giải \(u_1,u_2\), rồi tính \(R_0\).</div>
       </section>
 
       <section class="panel" id="dieu-kien-bien"><p class="kicker">05 · Áp điều kiện biên đúng chỗ</p><h2>Chuyển vị cho trước, lực cho trước và phản lực</h2><div class="table-wrap"><table class="table"><thead><tr><th>Dữ liệu</th><th>Đặt vào đâu?</th><th>Trong ví dụ</th></tr></thead><tbody><tr><td>Tải phân bố \(q\)</td><td>Tích phân \(\mathbf f_q^e=\int_e q\mathbf N^{\mathsf T}dx\), rồi lắp ghép.</td><td>\(\mathbf F_q=[1/2,1,1/2]^{\mathsf T}\)</td></tr><tr><td>Lực đầu mút \(P\)</td><td>Cộng một lần vào thành phần tải của bậc tự do tại đầu phải.</td><td>\(\mathbf F_P=[0,0,3]^{\mathsf T}\)</td></tr><tr><td>Chuyển vị \(u_0=g\)</td><td>Đặt vào nhóm bậc tự do đã biết; giải hệ rút gọn cho các bậc tự do còn lại.</td><td>\(u_0=0\)</td></tr><tr><td>Phản lực \(R_0\)</td><td>Tính sau khi có nghiệm: \(R_0=(\mathbf K\mathbf u-\mathbf F)_0\).</td><td>\(R_0=-5\)</td></tr></tbody></table></div>
