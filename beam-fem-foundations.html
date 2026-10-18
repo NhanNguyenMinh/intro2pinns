@@ -51,27 +51,126 @@ N_1&=1-3s^2+2s^3,&N_2&=h_e(s-2s^2+s^3),\\
 N_3&=3s^2-2s^3,&N_4&=h_e(-s^2+s^3).
 \end{aligned}\]</div><figure class="diagram"><svg viewBox="0 0 800 210" role="img" aria-label="Lưới dầm ba phần tử bốn nút, mỗi nút có độ võng và góc xoay"><path d="M65 80H735" stroke="#087e83" stroke-width="8" stroke-linecap="round"/><path d="M65 95l-18 23h36zM735 95l-18 23h36z" fill="#fff" stroke="#102a3a" stroke-width="2"/><path d="M35 121h60M705 121h60" stroke="#102a3a" stroke-width="2"/><g fill="#102a3a"><circle cx="65" cy="80" r="8"/><circle cx="288" cy="80" r="8"/><circle cx="512" cy="80" r="8"/><circle cx="735" cy="80" r="8"/></g><g font-family="system-ui" text-anchor="middle" fill="#102a3a" font-size="16"><text x="65" y="55">0</text><text x="288" y="55">1</text><text x="512" y="55">2</text><text x="735" y="55">3</text><text x="176" y="107">e₁</text><text x="400" y="107">e₂</text><text x="624" y="107">e₃</text><text x="65" y="160">w₀ = 0</text><text x="288" y="160">w₁, θ₁</text><text x="512" y="160">w₂, θ₂</text><text x="735" y="160">w₃ = 0</text></g><text x="400" y="197" text-anchor="middle" fill="#526473" font-family="system-ui" font-size="15">Ở gối tựa, góc xoay θ₀ và θ₃ vẫn là ẩn số tự do.</text></svg><figcaption>Rời rạc miền giống slide FEM: mỗi phần tử nối hai nút, nhưng phần tử dầm có hai bậc tự do ở mỗi nút.</figcaption></figure><p>Nếu bắt đầu từ đa thức \(w_h^e=a_0+a_1s+a_2s^2+a_3s^3\) và áp bốn điều kiện \(w_h^e(x_i)=w_i,\ (w_h^e)'(x_i)=\theta_i,\ w_h^e(x_{i+1})=w_{i+1},\ (w_h^e)'(x_{i+1})=\theta_{i+1}\) (đạo hàm theo \(x\)), ta thu được đúng bốn hàm Hermite đã viết ở trên. Đây là bước “xây dựng hàm dạng” của slide.</p><p>Hai hàm dạng gắn với chuyển vị nút; hai hàm còn lại gắn với góc xoay. Hệ số \(h_e\) trong \(N_2,N_4\) giữ đúng thứ nguyên chiều dài khi nhân với \(\theta\).</p><div class="callout gold"><strong>Vì sao không dùng nội suy tuyến tính \(C^0\)?</strong> Đạo hàm bậc hai của một hàm tuyến tính bằng 0 bên trong phần tử và độ dốc nhảy tại nút. Nó không thuộc không gian \(H^2\) theo cách ghép tiêu chuẩn ở đây. Có các FEM hỗn hợp hoặc không phù hợp khác, nhưng đó là mô hình rời rạc khác.</div></section>
 
-      <section class="panel" id="phan-tu"><p class="kicker">05 · Thay xấp xỉ vào dạng yếu</p><h2>Từ hàm thử tổng quát đến từng hàng ma trận</h2>
-      <p><strong>Dạng yếu rời rạc:</strong> tìm \(w_h\in V_h\) sao cho \(a(w_h,v_h)=\ell(v_h)\) với <em>mọi</em> \(v_h\in V_h\). Trên một phần tử, cả nghiệm lẫn hàm thử được biểu diễn bằng cùng cơ sở Hermite:</p>
-      <div class="eq">\[w_h^e=\mathbf N\mathbf d_e=\sum_{A=1}^4N_A d_{e,A},\qquad
-      v_h^e=\mathbf N\mathbf c_e=\sum_{A=1}^4N_A c_{e,A},\qquad
-      \mathbf B=\frac{d^2\mathbf N}{dx^2}.\]</div>
-      <p>\(\mathbf c_e\) chỉ là hệ số <strong>tùy ý của hàm thử</strong>, không phải ẩn vật lý mới. Sau khi cộng trên mọi phần tử và áp điều kiện thiết yếu cho các hệ số ở gối, tính tùy ý của \(\mathbf c\) cho hệ đại số. Tương đương, ta lần lượt chọn một hàm cơ sở toàn cục còn tự do làm \(v_h\); mỗi lựa chọn cho một hàng của hệ.</p>
-      <figure class="diagram"><svg viewBox="0 0 800 188" role="img" aria-label="Một hàm thử tổng quát là tổ hợp các hàm cơ sở; chọn từng hàm cơ sở tương ứng từng hàng của hệ FEM"><defs><marker id="row-tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#087e83"/></marker></defs><rect x="18" y="28" width="240" height="112" rx="14" fill="#e7f4f2"/><text x="138" y="62" text-anchor="middle" fill="#102a3a" font-family="system-ui" font-size="18">Hàm thử bất kỳ trong Vₕ</text><text x="138" y="104" text-anchor="middle" fill="#087e83" font-family="system-ui" font-size="22">vₕ = Σ cₐ Nₐ</text><path d="M271 84H324" stroke="#087e83" stroke-width="3" marker-end="url(#row-tip)"/><rect x="336" y="28" width="195" height="112" rx="14" fill="#fff4e4"/><text x="433" y="62" text-anchor="middle" fill="#102a3a" font-family="system-ui" font-size="18">Chọn cₐ = 1</text><text x="433" y="104" text-anchor="middle" fill="#9b5e1f" font-family="system-ui" font-size="22">vₕ = Nₐ</text><path d="M544 84H596" stroke="#087e83" stroke-width="3" marker-end="url(#row-tip)"/><rect x="608" y="28" width="174" height="112" rx="14" fill="#e7f4f2"/><text x="695" y="62" text-anchor="middle" fill="#102a3a" font-family="system-ui" font-size="18">Hàng thứ a</text><text x="695" y="104" text-anchor="middle" fill="#087e83" font-family="system-ui" font-size="22">Σ Kₐᵦdᵦ = fₐ</text><text x="400" y="173" text-anchor="middle" fill="#526473" font-family="system-ui" font-size="15">Chọn từng Nₐ chỉ là cách kiểm tra một đẳng thức đúng với mọi vₕ.</text></svg><figcaption>Trong slide, hàm kiểm tra được lấy lần lượt là các hàm dạng. Sơ đồ đặt lựa chọn đó trong phát biểu Galerkin tổng quát.</figcaption></figure>
-      <div class="eq">\[\sum_e\left(\mathbf c_e^{\mathsf T}\mathbf K_e\mathbf d_e-
-      \mathbf c_e^{\mathsf T}\mathbf f_e\right)=0,\qquad
-      \mathbf K_e=\int_e EI\,\mathbf B^{\mathsf T}\mathbf B\,dx,\quad
-      \mathbf f_e=\int_e q_0\,\mathbf N^{\mathsf T}\,dx.\]</div>
-      <p>Với \(EI\), \(q_0\) không đổi trên phần tử dài \(h\), tích phân cho kết quả tường minh:</p>
-      <div class="eq">\[\mathbf K_e=\frac{EI}{h^3}
-      \begin{bmatrix}12&6h&-12&6h\\6h&4h^2&-6h&2h^2\\-12&-6h&12&-6h\\6h&2h^2&-6h&4h^2\end{bmatrix},\qquad
-      \mathbf f_e=\frac{q_0h}{12}\begin{bmatrix}6\\h\\6\\-h\end{bmatrix}.\]</div>
-      <p>Kiểm tra: \((K_e)_{11}=12EI/h^3\), \((f_e)_1=q_0h/2\), \(K_e=K_e^{\mathsf T}\). Ma trận phần tử riêng lẻ còn có chuyển động cứng; lắp ráp và áp điều kiện biên mới cho hệ rút gọn có nghiệm duy nhất.</p></section>
+      <section class="panel" id="phan-tu">
+        <p class="kicker">05 · Từ tích phân đến ma trận</p>
+        <h2>Từ hàm thử tổng quát đến \(\mathbf K_e,\mathbf f_e\)</h2>
+        <p><strong>Bước 1 — Giữ hàm thử tổng quát.</strong> Sau khi chia dầm thành các phần tử \(e=[x_i,x_{i+1}]\), dạng yếu rời rạc là: tìm \(w_h\in V_h\) sao cho</p>
+        <div class="eq">\[\sum_e\int_e EI\,w_h''v_h''\,dx
+          =\sum_e\int_e q_0v_h\,dx\qquad\forall v_h\in V_h.\]</div>
+        <p>Ta <em>chưa</em> chọn \(v_h=N_A\). Trên phần tử \(e\), cả nghiệm và hàm thử đều là tổ hợp của bốn hàm Hermite \(N_A^e\) đã viết ở mục 4:</p>
+        <div class="eq">\[\begin{aligned}
+          w_h|_e&=\sum_{B=1}^4N_B^e d_{e,B}
+                 =\mathbf N_e\mathbf d_e,
+          &\mathbf d_e&=[w_i,\theta_i,w_{i+1},\theta_{i+1}]^{\mathsf T},\\
+          v_h|_e&=\sum_{A=1}^4N_A^e c_{e,A}
+                 =\mathbf N_e\mathbf c_e,
+          &\mathbf c_e&=[v_i,v_i',v_{i+1},v_{i+1}']^{\mathsf T}.
+        \end{aligned}\]</div>
+        <p>\(\mathbf d_e\) gồm các ẩn chuyển vị/góc xoay; \(\mathbf c_e\) gồm hệ số của <strong>một hàm thử tùy ý</strong>. Hàm thử và nghiệm dùng cùng cơ sở vì đây là Galerkin. Các hệ số tại nút chung được dùng chung bởi hai phần tử kề nhau; do đó \(\mathbf c_e\) của các phần tử <em>không độc lập</em>. Ở hai gối tựa, \(v_0=v_n=0\), còn \(v_0'\) và \(v_n'\) được phép khác không.</p>
+        <p><strong>Bước 2 — Lấy đạo hàm rồi thế vào từng tích phân.</strong> Đặt \(\mathbf B_e=\mathbf N_e''\) (đạo hàm theo tọa độ vật lý \(x\)). Khi đó \(w_h''=\mathbf B_e\mathbf d_e\) và \(v_h''=\mathbf B_e\mathbf c_e\):</p>
+        <div class="eq">\[\begin{aligned}
+          \int_e EI\,w_h''v_h''\,dx
+          &=\mathbf c_e^{\mathsf T}
+            \left[\int_e EI\,\mathbf B_e^{\mathsf T}\mathbf B_e\,dx\right]\mathbf d_e,\\
+          \int_e q_0v_h\,dx
+          &=\mathbf c_e^{\mathsf T}
+            \left[\int_e q_0\,\mathbf N_e^{\mathsf T}\,dx\right].
+        \end{aligned}\]</div>
+        <p>Vì các véc-tơ hệ số không phụ thuộc \(x\), ta đưa chúng ra ngoài dấu tích phân. Phần nằm trong ngoặc vuông chính là <strong>ma trận độ cứng phần tử</strong> và <strong>véc-tơ tải phần tử</strong>:</p>
+        <div class="eq">\[\boxed{
+          (K_e)_{AB}=\int_e EI\,(N_A^e)''(N_B^e)''\,dx,\qquad
+          (f_e)_A=\int_e q_0N_A^e\,dx,\quad A,B=1,\ldots,4.}\]</div>
+        <p>Do đó đóng góp của phần tử vào dạng yếu là
+          \(\mathbf c_e^{\mathsf T}(\mathbf K_e\mathbf d_e-\mathbf f_e)\).
+          Đây vẫn là một <em>biểu thức vô hướng</em>, chưa phải hệ bốn phương trình độc lập cho từng phần tử.</p>
+        <p><strong>Bước 3 — Tính các tích phân thật sự.</strong> Với \(s=(x-x_i)/h\), ta có \(dx=h\,ds\), \(d/dx=h^{-1}d/ds\). Hàng đạo hàm bậc hai của bốn hàm Hermite là</p>
+        <div class="eq">\[\mathbf B_e(s)=
+          \left[\frac{-6+12s}{h^2},\;
+                \frac{-4+6s}{h},\;
+                \frac{6-12s}{h^2},\;
+                \frac{-2+6s}{h}\right].\]</div>
+        <p>Ví dụ một phần tử của ma trận và một thành phần véc-tơ tải:</p>
+        <div class="eq">\[\begin{aligned}
+          (K_e)_{11}
+          &=EI\,h\int_0^1\frac{(-6+12s)^2}{h^4}\,ds
+            =\frac{12EI}{h^3},\\
+          (f_e)_1
+          &=q_0h\int_0^1(1-3s^2+2s^3)\,ds
+            =\frac{q_0h}{2}.
+        \end{aligned}\]</div>
+        <p>Tính tương tự 16 tích phân cho \(K_e\) và bốn tích phân cho \(f_e\) (chỉ cần 10 tích phân ma trận khác nhau nhờ đối xứng) được:</p>
+        <div class="eq">\[\boxed{\mathbf K_e=\frac{EI}{h^3}
+          \begin{bmatrix}
+          12&6h&-12&6h\\
+          6h&4h^2&-6h&2h^2\\
+          -12&-6h&12&-6h\\
+          6h&2h^2&-6h&4h^2
+          \end{bmatrix},\qquad
+          \mathbf f_e=\frac{q_0h}{12}
+          \begin{bmatrix}6\\h\\6\\-h\end{bmatrix}.}\]</div>
+        <div class="callout"><strong>Kiểm tra trước khi lắp ghép:</strong> \(K_e=K_e^{\mathsf T}\), \((K_e)_{11}=12EI/h^3\), \((f_e)_1=q_0h/2\). Ma trận phần tử riêng lẻ suy biến vì chuyển động cứng; điều đó không có nghĩa phép tích phân sai.</div>
+      </section>
 
-      <section class="panel" id="he-toan-cuc"><p class="kicker">06 · Cộng đóng góp và áp gối tựa</p><h2>Hệ đại số tuyến tính của FEM</h2><p>Đánh số toàn cục \(\mathbf d=[w_0,\theta_0,w_1,\theta_1,\ldots,w_n,\theta_n]^{\mathsf T}\). Với phần tử \(e\), ánh xạ bốn bậc tự do địa phương vào các chỉ số toàn cục \([2e,2e+1,2e+2,2e+3]\). Cộng các đóng góp vào những vị trí có chung chỉ số toàn cục; nút chung nhận đóng góp từ cả hai phần tử lân cận.</p><div class="eq">\[\mathbf K=\sum_e \mathbf A_e^{\mathsf T}\mathbf K_e\mathbf A_e,\qquad
-\mathbf f=\sum_e\mathbf A_e^{\mathsf T}\mathbf f_e,\qquad
-\mathbf K\mathbf d=\mathbf f.\]</div><figure class="diagram"><svg viewBox="0 0 800 194" role="img" aria-label="Hai phần tử dầm kề nhau dùng chung nút một, nên các đóng góp ma trận cùng cộng vào bậc tự do w một và theta một"><path d="M90 64H710" stroke="#087e83" stroke-width="8" stroke-linecap="round"/><g fill="#102a3a"><circle cx="90" cy="64" r="9"/><circle cx="400" cy="64" r="9"/><circle cx="710" cy="64" r="9"/></g><g fill="#102a3a" font-family="system-ui" font-size="17" text-anchor="middle"><text x="90" y="39">Nút 0</text><text x="400" y="39">Nút 1: dùng chung</text><text x="710" y="39">Nút 2</text><text x="245" y="92">Phần tử 1</text><text x="555" y="92">Phần tử 2</text></g><rect x="38" y="115" width="320" height="49" rx="9" fill="#e7f4f2"/><rect x="442" y="115" width="320" height="49" rx="9" fill="#fff4e4"/><text x="198" y="146" text-anchor="middle" fill="#087e83" font-family="system-ui" font-size="17">[w₀, θ₀, w₁, θ₁]</text><text x="602" y="146" text-anchor="middle" fill="#9b5e1f" font-family="system-ui" font-size="17">[w₁, θ₁, w₂, θ₂]</text><text x="400" y="187" text-anchor="middle" fill="#526473" font-family="system-ui" font-size="15">Hai phần tử đều ghi vào hàng/cột của w₁ và θ₁ trong hệ toàn cục.</text></svg><figcaption>Hình lắp ráp cho hai phần tử; đây là bản dầm của ý tưởng lắp ghép trong slide FEM.</figcaption></figure><p>Ở hai gối tựa, chỉ đặt \(w_0=w_n=0\). Các góc xoay \(\theta_0,\theta_n\) vẫn tự do. Nếu \(\mathbf d_f\) là các bậc tự do chưa biết thì</p><div class="eq">\[\boxed{\mathbf K_{ff}\mathbf d_f=\mathbf f_f-\mathbf K_{fc}\mathbf d_c
-=\mathbf f_f\quad\text{khi }\mathbf d_c=\mathbf0.}\]</div><p>Sau khi giải, tái tạo trường liên tục từng phần \(w_h(x)=\mathbf N(x)\mathbf d_e\) và mômen \(M_h(x)=-EI\,w_h''(x)\). Đánh giá nghiệm <strong>bên trong</strong> các phần tử, không chỉ ở nút; \(w_h''\), và do đó \(M_h\), có thể nhảy ở nút chung.</p></section>
+      <section class="panel" id="he-toan-cuc">
+        <p class="kicker">06 · Từ phần tử sang toàn dầm</p>
+        <h2>Lắp ghép, chọn hàm thử và áp điều kiện biên</h2>
+        <p><strong>Bước 4 — Ánh xạ về bậc tự do toàn cục.</strong> Với \(n\) phần tử, đặt
+          \(\mathbf d=[w_0,\theta_0,w_1,\theta_1,\ldots,w_n,\theta_n]^{\mathsf T}\)
+          và tương tự \(\mathbf c\) cho hàm thử. Nếu phần tử \(e\) nối nút \(e\) và \(e+1\), bốn chỉ số của nó là
+          \([2e,2e+1,2e+2,2e+3]\) khi bắt đầu đếm từ 0.
+          Gọi \(\mathbf A_e\) là ma trận chọn bậc tự do, kích thước \(4\times 2(n+1)\), sao cho
+          \(\mathbf d_e=\mathbf A_e\mathbf d\) và \(\mathbf c_e=\mathbf A_e\mathbf c\).</p>
+        <div class="eq">\[\begin{aligned}
+          0&=\sum_e\mathbf c_e^{\mathsf T}(\mathbf K_e\mathbf d_e-\mathbf f_e)\\
+           &=\mathbf c^{\mathsf T}
+             \left[\left(\sum_e\mathbf A_e^{\mathsf T}\mathbf K_e\mathbf A_e\right)\mathbf d
+                    -\sum_e\mathbf A_e^{\mathsf T}\mathbf f_e\right].
+        \end{aligned}\]</div>
+        <p>Vậy <strong>lắp ghép</strong> nghĩa là cộng các hệ số có cùng cặp chỉ số hàng–cột toàn cục và cộng các tải có cùng chỉ số bậc tự do:</p>
+        <div class="eq">\[\boxed{\mathbf K=\sum_e\mathbf A_e^{\mathsf T}\mathbf K_e\mathbf A_e,\qquad
+          \mathbf f=\sum_e\mathbf A_e^{\mathsf T}\mathbf f_e.}\]</div>
+        <figure class="diagram"><svg viewBox="0 0 800 194" role="img" aria-label="Hai phần tử dầm kề nhau dùng chung nút một, nên các đóng góp ma trận cùng cộng vào bậc tự do w một và theta một"><path d="M90 64H710" stroke="#087e83" stroke-width="8" stroke-linecap="round"/><g fill="#102a3a"><circle cx="90" cy="64" r="9"/><circle cx="400" cy="64" r="9"/><circle cx="710" cy="64" r="9"/></g><g fill="#102a3a" font-family="system-ui" font-size="17" text-anchor="middle"><text x="90" y="39">Nút 0</text><text x="400" y="39">Nút 1: dùng chung</text><text x="710" y="39">Nút 2</text><text x="245" y="92">Phần tử 0</text><text x="555" y="92">Phần tử 1</text></g><rect x="38" y="115" width="320" height="49" rx="9" fill="#e7f4f2"/><rect x="442" y="115" width="320" height="49" rx="9" fill="#fff4e4"/><text x="198" y="146" text-anchor="middle" fill="#087e83" font-family="system-ui" font-size="17">[w₀, θ₀, w₁, θ₁]</text><text x="602" y="146" text-anchor="middle" fill="#9b5e1f" font-family="system-ui" font-size="17">[w₁, θ₁, w₂, θ₂]</text><text x="400" y="187" text-anchor="middle" fill="#526473" font-family="system-ui" font-size="15">Các hàng/cột của w₁ và θ₁ nhận đóng góp từ cả hai phần tử.</text></svg><figcaption>Hai phần tử dùng chung nút 1 nên các đóng góp ở nút này được cộng, không tạo hai nút độc lập.</figcaption></figure>
+        <p><strong>Ví dụ hai phần tử.</strong> Chia \(L=1\) thành hai đoạn \(h=1/2\), lấy \(EI=q_0=1\). Mỗi phần tử có cùng \(\mathbf K_e,\mathbf f_e\). Chia \(K_e\) thành bốn khối \(2\times2\) ứng với hai nút đầu/cuối, và \(f_e\) thành hai khối \(2\times1\). Khi đó cấu trúc lắp ghép là</p>
+        <div class="eq">\[\mathbf K=
+          \begin{bmatrix}
+          K_{11}^{(0)}&K_{12}^{(0)}&0\\
+          K_{21}^{(0)}&K_{22}^{(0)}+K_{11}^{(1)}&K_{12}^{(1)}\\
+          0&K_{21}^{(1)}&K_{22}^{(1)}
+          \end{bmatrix},\qquad
+          \mathbf f=
+          \begin{bmatrix}
+          f_1^{(0)}\\f_2^{(0)}+f_1^{(1)}\\f_2^{(1)}
+          \end{bmatrix}.\]</div>
+        <p>Mỗi ô của công thức khối là ma trận \(2\times2\) hoặc véc-tơ hai thành phần. Chẳng hạn, bậc tự do \(w_1\) nhận
+          \(K_{w_1w_1}=96+96=192\) và \(f_{w_1}=1/4+1/4=1/2\); bậc tự do \(\theta_1\) nhận
+          \(K_{\theta_1\theta_1}=8+8=16\) và \(f_{\theta_1}=-1/48+1/48=0\).
+          Đây là phép cộng cụ thể tại nút chung.</p>
+        <p><strong>Bước 5 — Từ “mọi hàm thử” đến các hàng phương trình.</strong> Ở gối tựa, \(w_0=w_n=0\) và hàm thử cũng phải có \(v_0=v_n=0\). Các hệ số thử còn lại \(c_j\) tùy ý. Từ
+          \(\mathbf c^{\mathsf T}(\mathbf K\mathbf d-\mathbf f)=0\) với mọi \(\mathbf c\) hợp lệ, ta được
+          \((\mathbf K\mathbf d-\mathbf f)_j=0\) tại <em>mỗi bậc tự do tự do</em> \(j\).
+          Chọn riêng \(c_j=1\), các hệ số thử tự do khác bằng 0, chính là lấy một hàm cơ sở toàn cục làm hàm thử để viết hàng \(j\). Các hàng tại \(w_0,w_n\) không dùng để giải chuyển vị; sau khi giải có thể dùng chúng để tính phản lực gối.</p>
+        <div class="eq">\[\boxed{\mathbf K_{ff}\mathbf d_f
+          =\mathbf f_f-\mathbf K_{fc}\mathbf d_c,\qquad
+          \mathbf d_c=\mathbf0\ \Longrightarrow
+          \mathbf K_{ff}\mathbf d_f=\mathbf f_f.}\]</div>
+        <p>Với ví dụ hai phần tử, \(\mathbf d_f=[\theta_0,w_1,\theta_1,\theta_2]^{\mathsf T}\); hệ rút gọn sau khi đặt \(w_0=w_2=0\) là</p>
+        <div class="eq">\[
+          \begin{bmatrix}
+          8&-24&4&0\\
+          -24&192&0&24\\
+          4&0&16&4\\
+          0&24&4&8
+          \end{bmatrix}
+          \begin{bmatrix}\theta_0\\w_1\\\theta_1\\\theta_2\end{bmatrix}
+          =
+          \begin{bmatrix}1/48\\1/2\\0\\-1/48\end{bmatrix}
+          \quad\Longrightarrow\quad
+          \begin{bmatrix}\theta_0\\w_1\\\theta_1\\\theta_2\end{bmatrix}
+          =
+          \begin{bmatrix}1/24\\5/384\\0\\-1/24\end{bmatrix}.
+          \]</div>
+        <p>Cuối cùng, dùng bốn bậc tự do của từng phần tử để tái tạo \(w_h(x)=\mathbf N_e(x)\mathbf d_e\) và \(M_h(x)=-EI\,w_h''(x)\). \(w_h,w_h'\) liên tục qua nút; \(w_h''\) và mômen có thể nhảy. Giá trị \(w_1=5/384\) ở giữa dầm trùng nghiệm giải tích tại nút này, nhưng không có nghĩa cả hàm \(w_h\) đã chính xác.</p>
+      </section>
 
       <section class="panel" id="vi-du"><p class="kicker">07 · Một phần tử, giải hết trên giấy</p><h2>Nhìn thấy nghiệm FEM cụ thể</h2><p>Lấy \(L=EI=q_0=1\), dùng một phần tử dài \(h=1\). Do \(w_0=w_1=0\), chỉ còn hai góc xoay. Hệ rút gọn và nghiệm là</p><div class="eq">\[\begin{bmatrix}4&2\\2&4\end{bmatrix}
 \begin{bmatrix}\theta_0\\\theta_1\end{bmatrix}
