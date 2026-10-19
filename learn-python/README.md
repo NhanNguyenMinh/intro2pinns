@@ -39,7 +39,7 @@ Trong CMD, chuyển vào thư mục này rồi chạy:
     python 04-torch-pinn.py --steps 200
     python 02-numpy-plot-sympy.py --plot-pinn
 
-Mở notebook bằng lệnh jupyter lab trong cùng môi trường, chọn kernel intro2pinns-learning nếu có nhiều kernel. Notebook phù hợp để thử từng ý; riêng bài 04 tự chứa đầy đủ ví dụ tensor, autograd, huấn luyện và kiểm chứng trên Colab. Script là bản có thể chạy lại từ đầu đến cuối. Không nộp notebook chỉ chạy được nhờ các ô đã thực hiện theo thứ tự khác.
+Mở notebook bằng lệnh jupyter lab trong cùng môi trường, chọn kernel intro2pinns-learning nếu có nhiều kernel. Notebook phù hợp để thử từng ý; bài 03 và 04 đều tự chứa ví dụ ngắn để học trên Colab: hai vòng lặp lắp ghép FEM, một hàm autograd và một vòng train PINN. Script là bản có thể chạy lại từ đầu đến cuối. Không nộp notebook chỉ chạy được nhờ các ô đã thực hiện theo thứ tự khác.
 
 Mỗi bài kết thúc bằng một minh chứng ngắn: câu trả lời cho câu hỏi trên trang HTML, mã đã chạy, và hình/bảng kết quả. Các hình do script tạo nằm trong thư mục outputs (không theo dõi bằng Git). Cả nhóm ghi phiên bản Python và thư viện khi báo cáo kết quả; file environment.yml là điểm bắt đầu để tái lập.
 
