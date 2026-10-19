@@ -9,7 +9,8 @@ Có thể học trực tiếp trên trình duyệt: [hướng dẫn Google Colab
 | 01. CMD và Python cơ bản | [Trang 01](01-cmd-python.html) | [Notebook 01](01-cmd-python.ipynb) | [Script 01](01-cmd-python.py) |
 | 02. NumPy, đồ thị, SymPy | [Trang 02](02-numpy-plot-sympy.html) | [Notebook 02](02-numpy-plot-sympy.ipynb) | [Script 02](02-numpy-plot-sympy.py) |
 | 03. Hệ tuyến tính và FEM | [Trang 03](03-linear-fem.html) | [Notebook 03](03-linear-fem.ipynb) | [Script 03](03-linear-fem.py) |
-| 04. PyTorch và PINN đầu tiên | [Trang 04](04-torch-pinn.html) | [Notebook 04](04-torch-pinn.ipynb) | [Script 04](04-torch-pinn.py) |
+| 04. PyTorch và PINN đầu tiên | [Trang 04](04-torch-pinn.html) | [Notebook 04 tự chứa](04-torch-pinn.ipynb) | [Script 04](04-torch-pinn.py) |
+| 05. Tích hợp FEM–PINN | [Mở trên Colab](https://colab.research.google.com/github/NhanNguyenMinh/intro2pinns/blob/main/learn-python/05-beam-fem-to-pinn.ipynb) | [Notebook 05](05-beam-fem-to-pinn.ipynb) | — |
 
 ## Cài đặt trên Windows
 
@@ -38,7 +39,7 @@ Trong CMD, chuyển vào thư mục này rồi chạy:
     python 04-torch-pinn.py --steps 200
     python 02-numpy-plot-sympy.py --plot-pinn
 
-Mở notebook bằng lệnh jupyter lab trong cùng môi trường, chọn kernel intro2pinns-learning nếu có nhiều kernel. Notebook phù hợp để thử từng ý; script là bản có thể chạy lại từ đầu đến cuối. Không nộp notebook chỉ chạy được nhờ các ô đã thực hiện theo thứ tự khác.
+Mở notebook bằng lệnh jupyter lab trong cùng môi trường, chọn kernel intro2pinns-learning nếu có nhiều kernel. Notebook phù hợp để thử từng ý; riêng bài 04 tự chứa đầy đủ ví dụ tensor, autograd, huấn luyện và kiểm chứng trên Colab. Script là bản có thể chạy lại từ đầu đến cuối. Không nộp notebook chỉ chạy được nhờ các ô đã thực hiện theo thứ tự khác.
 
 Mỗi bài kết thúc bằng một minh chứng ngắn: câu trả lời cho câu hỏi trên trang HTML, mã đã chạy, và hình/bảng kết quả. Các hình do script tạo nằm trong thư mục outputs (không theo dõi bằng Git). Cả nhóm ghi phiên bản Python và thư viện khi báo cáo kết quả; file environment.yml là điểm bắt đầu để tái lập.
 
