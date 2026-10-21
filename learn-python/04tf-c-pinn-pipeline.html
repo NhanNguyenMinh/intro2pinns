@@ -1,0 +1,73 @@
+﻿<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="TF-c · Pipeline PINN: bài tập TensorFlow từng bước cho PINN dầm.">
+<title>TF-c · Pipeline PINN · intro2pinns</title><link rel="stylesheet" href="tutorial.css">
+<style>.formula{overflow-x:auto}.panel h1{font-size:1.7rem;margin:0 0 12px}.panel h2{font-size:1.35rem;margin:0 0 10px}.panel p:last-child{margin-bottom:0}</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$']]} ,options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script></head>
+<body><header class="topbar"><div class="wrap"><a class="brand" href="index.html">intro<span>2</span>pinns / TensorFlow</a><nav aria-label="Điều hướng"><a href="index.html">Python</a><a href="../beam-pinn-foundations-tensorflow.html">Bài dầm TensorFlow</a><a href="../beam-pinn-foundations.html">Bản PyTorch</a></nav></div></header>
+<div class="hero"><div class="wrap"><p class="eyebrow">Bài tập nhỏ · TensorFlow</p><h1>TF-c · Pipeline PINN</h1><p>Từ residual và loss đến train và verify</p><div class="chips"><span>CPU / Colab</span><span>Chạy từng ô</span><span>Tự kiểm đầu ra</span></div></div></div>
+<main class="wrap"><section class="panel"><p class="label">Thực hành</p><h2>Mở bản có thể chạy</h2><p><a class="button" href="https://colab.research.google.com/github/NhanNguyenMinh/intro2pinns/blob/main/learn-python/04tf-c-pinn-pipeline.ipynb" target="_blank" rel="noopener noreferrer">Mở trên Colab ↗</a> <a class="button ghost" href="04tf-c-pinn-pipeline.ipynb">Tải notebook</a></p><p>Chạy theo thứ tự từ trên xuống. Các ô mã trên trang tương ứng với ô trong notebook; hãy tự dự đoán shape hoặc giá trị trước khi chạy.</p></section>
+<section class='panel'><h1>TF-c · Một vòng PINN cho dầm</h1>
+<p>Đi từ mạng → điểm miền/biên → đạo hàm → loss → một bước Adam → nhiều bước → kiểm chứng. Giải u''''=1, u(0)=u(1)=u''(0)=u''(1)=0. Nghiệm đúng chỉ xuất hiện ở bước kiểm chứng.</p></section>
+<section class='panel'><p class='label'>Thử trong notebook</p><pre><code>import tensorflow as tf
+tf.keras.backend.set_floatx(&#x27;float64&#x27;)
+tf.keras.utils.set_random_seed(7)
+model = tf.keras.Sequential([tf.keras.Input(shape=(1,)),
+    tf.keras.layers.Dense(16, activation=&#x27;tanh&#x27;),
+    tf.keras.layers.Dense(16, activation=&#x27;tanh&#x27;),
+    tf.keras.layers.Dense(1)])
+x_c = tf.reshape((tf.cast(tf.range(16),tf.float64)+0.5)/16,(-1,1))
+x_b = tf.constant([[0.0],[1.0]],dtype=tf.float64)
+print(x_c.shape,x_b.shape)
+</code></pre></section>
+<section class='panel'><h2>1. Đạo hàm theo x</h2>
+<p>Bốn tape lấy u''''. Chúng phải nằm trong tape_theta của bước train để loss còn truyền gradient về trọng số.</p></section>
+<section class='panel'><p class='label'>Thử trong notebook</p><pre><code>def derivatives(model,x):
+    with tf.GradientTape() as t4:
+        t4.watch(x)
+        with tf.GradientTape() as t3:
+            t3.watch(x)
+            with tf.GradientTape() as t2:
+                t2.watch(x)
+                with tf.GradientTape() as t1:
+                    t1.watch(x)
+                    u=model(x)
+                u1=t1.gradient(u,x)
+            u2=t2.gradient(u1,x)
+        u3=t3.gradient(u2,x)
+    u4=t4.gradient(u3,x)
+    return u,u2,u4
+</code></pre></section>
+<section class='panel'><h2>2. Một bước train</h2>
+<p>Loss PDE là trung bình bình phương u''''-1. Loss biên cộng bình phương u và u'' ở hai đầu. Tape ngoài lấy đạo hàm loss theo trọng số; Adam cập nhật chúng.</p></section>
+<section class='panel'><p class='label'>Thử trong notebook</p><pre><code>optimizer=tf.keras.optimizers.Adam(learning_rate=0.005)
+def train_step():
+    with tf.GradientTape() as tape_theta:
+        _,_,u4_c=derivatives(model,x_c)
+        u_b,u2_b,_=derivatives(model,x_b)
+        loss_pde=tf.reduce_mean((u4_c-1.0)**2)
+        loss_bc=tf.reduce_sum(u_b**2+u2_b**2)
+        loss=loss_pde+10.0*loss_bc
+    weights=model.trainable_variables
+    gradients=tape_theta.gradient(loss,weights)
+    optimizer.apply_gradients(zip(gradients,weights))
+    return float(loss_pde),float(loss_bc),float(loss)
+print(&#x27;một bước:&#x27;,train_step())
+</code></pre></section>
+<section class='panel'><h2>3. Lặp và kiểm chứng</h2>
+<p>Mỗi bước forward lại với trọng số vừa cập nhật. Lưới kiểm chứng mới không được dùng để train.</p></section>
+<section class='panel'><p class='label'>Thử trong notebook</p><pre><code>history=[]
+for step in range(150):
+    _,_,loss=train_step()
+    history.append(loss)
+print(&#x27;loss đầu/cuối:&#x27;,history[0],history[-1])
+x_test=tf.reshape(tf.linspace(tf.constant(0.,tf.float64),tf.constant(1.,tf.float64),101),(-1,1))
+u_pred=model(x_test)
+u_exact=(x_test**4-2*x_test**3+x_test)/24
+error=tf.sqrt(tf.reduce_sum((u_pred-u_exact)**2)/tf.reduce_sum(u_exact**2))
+print(&#x27;sai số chuyển vị tương đối:&#x27;,float(error))
+</code></pre></section>
+<section class='panel'><p>Tự làm: chỉ đổi 16 điểm miền thành 32 hoặc 150 bước thành 300. Ghi loss cuối và sai số kiểm chứng. Loss PDE không phải sai số nghiệm. Đọc trang TensorFlow đầy đủ và script để thêm mômen, CSV, nhiều seed.</p></section>
+<section class="panel"><div class="bottom-nav"><a class="button ghost" href="../beam-pinn-foundations-tensorflow.html">← Tổng quan TensorFlow</a><a class="button" href="../beam-pinn-foundations-tensorflow.html">Bước tiếp theo →</a></div></section></main>
+<footer class="footer"><div class="wrap"><p><strong>intro2pinns</strong> · TensorFlow theo từng bước</p><p><a href="index.html">Về lộ trình Python</a></p></div></footer></body></html>

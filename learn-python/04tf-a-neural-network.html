@@ -1,0 +1,39 @@
+﻿<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="TF-a · Mạng Keras: bài tập TensorFlow từng bước cho PINN dầm.">
+<title>TF-a · Mạng Keras · intro2pinns</title><link rel="stylesheet" href="tutorial.css">
+<style>.formula{overflow-x:auto}.panel h1{font-size:1.7rem;margin:0 0 12px}.panel h2{font-size:1.35rem;margin:0 0 10px}.panel p:last-child{margin-bottom:0}</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$']]} ,options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script></head>
+<body><header class="topbar"><div class="wrap"><a class="brand" href="index.html">intro<span>2</span>pinns / TensorFlow</a><nav aria-label="Điều hướng"><a href="index.html">Python</a><a href="../beam-pinn-foundations-tensorflow.html">Bài dầm TensorFlow</a><a href="../beam-pinn-foundations.html">Bản PyTorch</a></nav></div></header>
+<div class="hero"><div class="wrap"><p class="eyebrow">Bài tập nhỏ · TensorFlow</p><h1>TF-a · Mạng Keras</h1><p>Từ tọa độ đến chuyển vị dự đoán</p><div class="chips"><span>CPU / Colab</span><span>Chạy từng ô</span><span>Tự kiểm đầu ra</span></div></div></div>
+<main class="wrap"><section class="panel"><p class="label">Thực hành</p><h2>Mở bản có thể chạy</h2><p><a class="button" href="https://colab.research.google.com/github/NhanNguyenMinh/intro2pinns/blob/main/learn-python/04tf-a-neural-network.ipynb" target="_blank" rel="noopener noreferrer">Mở trên Colab ↗</a> <a class="button ghost" href="04tf-a-neural-network.ipynb">Tải notebook</a></p><p>Chạy theo thứ tự từ trên xuống. Các ô mã trên trang tương ứng với ô trong notebook; hãy tự dự đoán shape hoặc giá trị trước khi chạy.</p></section>
+<section class='panel'><h1>TF-a · Mạng Keras là một hàm tọa độ → chuyển vị</h1>
+<p>Mục tiêu: hiểu shape, Dense, tanh, model(x) và trainable_variables. Chưa dùng phương trình dầm. Chạy trên CPU Colab.</p></section>
+<section class='panel'><p class='label'>Thử trong notebook</p><pre><code>import tensorflow as tf
+tf.keras.backend.set_floatx(&#x27;float64&#x27;)
+tf.keras.utils.set_random_seed(7)
+print(&#x27;TensorFlow&#x27;, tf.__version__)
+</code></pre></section>
+<section class='panel'><h2>1. Một lớp Dense</h2>
+<p>Một hàng x có một tọa độ. Dense(1,3) tạo ba đặc trưng: z=xW+b. In shape và tham số để nhìn thấy điều này.</p></section>
+<section class='panel'><p class='label'>Thử trong notebook</p><pre><code>layer = tf.keras.layers.Dense(3)
+x = tf.constant([[0.0], [0.5], [1.0]], dtype=tf.float64)
+z = layer(x)
+print(&#x27;x:&#x27;, x.shape, &#x27;z:&#x27;, z.shape)
+print(&#x27;kernel:&#x27;, layer.kernel.shape, &#x27;bias:&#x27;, layer.bias.shape)
+</code></pre></section>
+<section class='panel'><h2>2. Ghép thành hàm u_theta(x)</h2>
+<p>Tanh tạo tính phi tuyến; Dense cuối không có activation. Đầu ra ở điểm mới là dự đoán của cùng một hàm, không phải một ô mới trong bảng nghiệm.</p></section>
+<section class='panel'><p class='label'>Thử trong notebook</p><pre><code>model = tf.keras.Sequential([tf.keras.Input(shape=(1,)),
+    tf.keras.layers.Dense(8, activation=&#x27;tanh&#x27;),
+    tf.keras.layers.Dense(1)])
+y = model(x)
+x_new = tf.constant([[0.37]], dtype=tf.float64)
+print(&#x27;y tại 3 điểm:&#x27;, y.numpy().reshape(-1))
+print(&#x27;y tại 0.37:&#x27;, model(x_new).numpy().reshape(-1))
+print(&#x27;số tham số:&#x27;, sum(int(tf.size(v)) for v in model.trainable_variables))
+</code></pre></section>
+<section class='panel'><p>Tự làm: đổi Dense(8) thành Dense(16), in lại số tham số và shape đầu ra. Trước train, không gọi các giá trị này là nghiệm dầm.</p></section>
+<section class="panel"><div class="bottom-nav"><a class="button ghost" href="../beam-pinn-foundations-tensorflow.html">← Tổng quan TensorFlow</a><a class="button" href="04tf-b-gradient-tape.html">Bước tiếp theo →</a></div></section></main>
+<footer class="footer"><div class="wrap"><p><strong>intro2pinns</strong> · TensorFlow theo từng bước</p><p><a href="index.html">Về lộ trình Python</a></p></div></footer></body></html>

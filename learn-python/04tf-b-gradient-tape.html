@@ -1,0 +1,48 @@
+﻿<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="TF-b · GradientTape: bài tập TensorFlow từng bước cho PINN dầm.">
+<title>TF-b · GradientTape · intro2pinns</title><link rel="stylesheet" href="tutorial.css">
+<style>.formula{overflow-x:auto}.panel h1{font-size:1.7rem;margin:0 0 12px}.panel h2{font-size:1.35rem;margin:0 0 10px}.panel p:last-child{margin-bottom:0}</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$']]} ,options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script></head>
+<body><header class="topbar"><div class="wrap"><a class="brand" href="index.html">intro<span>2</span>pinns / TensorFlow</a><nav aria-label="Điều hướng"><a href="index.html">Python</a><a href="../beam-pinn-foundations-tensorflow.html">Bài dầm TensorFlow</a><a href="../beam-pinn-foundations.html">Bản PyTorch</a></nav></div></header>
+<div class="hero"><div class="wrap"><p class="eyebrow">Bài tập nhỏ · TensorFlow</p><h1>TF-b · GradientTape</h1><p>Từ quy tắc dây chuyền đến đạo hàm bậc bốn</p><div class="chips"><span>CPU / Colab</span><span>Chạy từng ô</span><span>Tự kiểm đầu ra</span></div></div></div>
+<main class="wrap"><section class="panel"><p class="label">Thực hành</p><h2>Mở bản có thể chạy</h2><p><a class="button" href="https://colab.research.google.com/github/NhanNguyenMinh/intro2pinns/blob/main/learn-python/04tf-b-gradient-tape.ipynb" target="_blank" rel="noopener noreferrer">Mở trên Colab ↗</a> <a class="button ghost" href="04tf-b-gradient-tape.ipynb">Tải notebook</a></p><p>Chạy theo thứ tự từ trên xuống. Các ô mã trên trang tương ứng với ô trong notebook; hãy tự dự đoán shape hoặc giá trị trước khi chạy.</p></section>
+<section class='panel'><h1>TF-b · GradientTape theo tọa độ</h1>
+<p>Mục tiêu: hiểu tape.watch, đạo hàm bậc cao và phân biệt gradient theo x với gradient theo trọng số.</p></section>
+<section class='panel'><p class='label'>Thử trong notebook</p><pre><code>import tensorflow as tf
+tf.keras.backend.set_floatx(&#x27;float64&#x27;)
+print(&#x27;TensorFlow&#x27;, tf.__version__)
+</code></pre></section>
+<section class='panel'><h2>1. Vì sao phải watch(x)?</h2>
+<p>Tensor hằng không được tape theo dõi tự động. Tape phải thấy phép tính y=x³ sau khi watch x.</p></section>
+<section class='panel'><p class='label'>Thử trong notebook</p><pre><code>x = tf.constant([[0.5], [1.0]], dtype=tf.float64)
+with tf.GradientTape() as tape:
+    tape.watch(x)
+    y = x**3
+dy = tape.gradient(y, x)
+print(dy.numpy().reshape(-1))  # 3*x**2: [0.75, 3.0]
+</code></pre></section>
+<section class='panel'><h2>2. Đạo hàm của đạo hàm</h2>
+<p>Tape ngoài phải bao phép lấy đạo hàm của tape trong. Mỗi tape dùng một lần, nên không cần persistent=True.</p></section>
+<section class='panel'><p class='label'>Thử trong notebook</p><pre><code>x = tf.constant([[0.25], [0.75]], dtype=tf.float64)
+with tf.GradientTape() as t4:
+    t4.watch(x)
+    with tf.GradientTape() as t3:
+        t3.watch(x)
+        with tf.GradientTape() as t2:
+            t2.watch(x)
+            with tf.GradientTape() as t1:
+                t1.watch(x)
+                p = x**4 - 2*x**3 + x
+            p1 = t1.gradient(p, x)
+        p2 = t2.gradient(p1, x)
+    p3 = t3.gradient(p2, x)
+p4 = t4.gradient(p3, x)
+print(p4.numpy().reshape(-1))  # [24, 24]
+</code></pre></section>
+<section class='panel'><h2>3. Một lỗi có chủ ý</h2>
+<p>Không watch x thì gradient theo x là None. Tự bỏ tape.watch(x) trong một ô bản sao để kiểm tra, rồi khôi phục. Các trọng số Keras là tf.Variable nên được tape theo dõi tự động khi train.</p>
+<p>Tự làm: thay p bằng x**4 và dự đoán p4. Giải thích vì sao tape ngoài phải bao tape trong.</p></section>
+<section class="panel"><div class="bottom-nav"><a class="button ghost" href="../beam-pinn-foundations-tensorflow.html">← Tổng quan TensorFlow</a><a class="button" href="04tf-c-pinn-pipeline.html">Bước tiếp theo →</a></div></section></main>
+<footer class="footer"><div class="wrap"><p><strong>intro2pinns</strong> · TensorFlow theo từng bước</p><p><a href="index.html">Về lộ trình Python</a></p></div></footer></body></html>
