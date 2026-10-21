@@ -12,4 +12,42 @@ dy = torch.autograd.grad(
         y, x, torch.ones_like(y), create_graph=True
     )[0]</code></pre><p>Sau đó viết <code>p1=grad(p,x)</code>, <code>p2=grad(p1,x)</code>...; đây chỉ là cách tránh lặp câu lệnh dài.</p></section>
 <section class="panel"><p class="label">03 · Hai vai trò gradient</p><h2><code>grad(u,x)</code> khác <code>loss.backward()</code></h2><div class="grid"><div class="card"><h3>Đạo hàm theo tọa độ</h3><p><code>grad(u,x)</code> cho \(u',u'',u^{(4)}\). PINN dùng chúng để đo residual phương trình.</p></div><div class="card"><h3>Đạo hàm theo trọng số</h3><p><code>loss.backward()</code> tìm gradient của loss theo trọng số mạng; <code>optimizer.step()</code> dùng gradient đó để cập nhật mạng.</p></div></div><div class="task"><strong>Tự kiểm:</strong> bỏ <code>requires_grad=True</code> trong một ô bản sao, ghi thông báo lỗi rồi khôi phục. Giải thích vì sao <code>create_graph=True</code> cần cho bài toán dầm bậc bốn.</div><div class="bottom-nav"><a class="button ghost" href="04a-neural-network.html">← Neural network</a><a class="button" href="04c-pinn-pipeline.html">Tiếp: pipeline PINN →</a></div></section>
+<section class="panel"><p class="label">04 · Cơ chế phía sau</p><h2>PyTorch đi ngược trên đồ thị phép toán</h2><p>Trong lúc chạy các phép toán với tensor cần gradient, PyTorch ghi lại phép nào tạo ra tensor mới. Ví dụ \(z=2x+1\), \(y=z^3\) tạo chuỗi \(x\to z\to y\). Để tính đạo hàm, autograd đi ngược từ \(y\) về \(x\) và áp dụng quy tắc dây chuyền:</p><div class="formula">\[\frac{dy}{dx}=\frac{dy}{dz}\frac{dz}{dx}=3z^2\cdot 2=6(2x+1)^2.\]</div><pre><code>x = torch.tensor(2.0, requires_grad=True)
+z = 2*x + 1
+y = z**3
+print(x.is_leaf, x.grad_fn)       # True, None: tensor đầu vào
+print(z.grad_fn, y.grad_fn)       # các nút phép toán đã được ghi
+print(torch.autograd.grad(y, x)[0])  # 150</code></pre><p>PyTorch không in một công thức ký hiệu như SymPy; nó lưu đường đi và các thông tin cần cho truyền ngược. Vì vậy, nếu muốn đạo hàm theo tọa độ \(x\), phải đặt <code>requires_grad=True</code> <em>trước khi</em> tính <code>y</code>. Bật cờ sau phép forward không thể bổ sung những phép toán đã bỏ qua: hãy tính lại <code>y</code>.</p><pre><code>x_plain = torch.tensor(2.0)      # requires_grad=False mặc định
+y_plain = x_plain**3
+print(y_plain.grad_fn)            # None
+# torch.autograd.grad(y_plain, x_plain) sẽ báo lỗi</code></pre><p>Nếu tọa độ không theo dõi nhưng trọng số của <code>model</code> có theo dõi, PyTorch vẫn có thể lấy gradient theo <em>trọng số</em>. Nó sẽ không lấy được đạo hàm nghiệm theo tọa độ để lập residual PDE. Các tham số trong <code>nn.Linear</code> mặc định đã bật <code>requires_grad</code>; tọa độ collocation thì ta phải bật chủ động.</p></section>
+<section class="panel"><p class="label">05 · Đầu ra nhiều điểm</p><h2>Vì sao cần <code>grad_outputs</code>?</h2><p>Khi <code>y</code> có nhiều phần tử, autograd cần biết tổ hợp đầu ra nào được truyền ngược. <code>torch.ones_like(y)</code> chọn tổng \(\sum_i y_i\). Trong bài dầm, mỗi hàng \(y_i\) chỉ phụ thuộc tọa độ cùng hàng \(x_i\), nên gradient của tổng theo \(x_i\) đúng là \(dy_i/dx_i\).</p><pre><code>x = torch.tensor([[0.5], [1.0]], dtype=torch.float64,
+                 requires_grad=True)
+y = x**3
+dy = torch.autograd.grad(y, x,
+                         grad_outputs=torch.ones_like(y))[0]
+print(dy.reshape(-1).tolist())  # [0.75, 3.0]</code></pre><p>Nếu mô hình trộn các hàng, kết quả là đạo hàm của <em>tổng đầu ra</em>, không còn là từng đạo hàm riêng như trong ví dụ này.</p></section>
+<section class="panel"><p class="label">06 · Đồ thị của đạo hàm</p><h2><code>create_graph=True</code> để làm gì?</h2><p>Lần gọi <code>autograd.grad</code> đầu cho một giá trị đạo hàm. Muốn lấy đạo hàm của <em>giá trị đó</em>, các phép toán tạo ra nó cũng phải được ghi lại; đây là việc của <code>create_graph=True</code>.</p><pre><code>x = torch.tensor(2.0, requires_grad=True)
+y = x**3
+dy = torch.autograd.grad(y, x, create_graph=True)[0]
+print(dy, dy.requires_grad)       # 12, True
+d2y = torch.autograd.grad(dy, x)[0]
+print(d2y)                       # 12 = 6*x tại x=2</code></pre><p>Đổi lần gọi đầu thành <code>create_graph=False</code> thì không lấy tiếp được đạo hàm bậc hai. Trong PINN dầm, helper dùng <code>create_graph=True</code> cả ở lần lấy đạo hàm bậc bốn: <code>loss.backward()</code> còn phải truyền gradient từ residual \(u_\theta^{(4)}-1\) về trọng số mạng. <code>create_graph</code> khác với <code>retain_graph</code>: cờ thứ hai dùng để giữ đồ thị cũ cho một lần truyền ngược khác.</p></section>
+<section class="panel"><p class="label">07 · Bật hay tắt?</p><h2>Chỉ giữ đồ thị khi còn cần đạo hàm</h2><table class="table"><thead><tr><th>Tình huống</th><th>Tọa độ</th><th><code>create_graph</code></th></tr></thead><tbody><tr><td>Train PINN dầm dạng mạnh: cần \(u^{(4)}\) và gradient loss theo trọng số</td><td><code>requires_grad=True</code></td><td><code>True</code> cho các lần đạo hàm trong loss</td></tr><tr><td>Chỉ dự đoán chuyển vị tại điểm mới</td><td><code>False</code></td><td>Không gọi autograd; dùng <code>torch.no_grad()</code></td></tr><tr><td>Đánh giá mômen \(-u''\), không train</td><td><code>True</code></td><td><code>True</code> ở đạo hàm đầu; lần cuối có thể <code>False</code></td></tr><tr><td>In một đạo hàm bậc một, không dùng tiếp</td><td><code>True</code></td><td><code>False</code></td></tr></tbody></table><pre><code>from torch import nn
+model = nn.Sequential(nn.Linear(1, 8), nn.Tanh(), nn.Linear(8, 1)).double()
+# Mạng ví dụ chưa train; chỉ minh họa cú pháp đánh giá.
+# Chỉ cần giá trị u: tắt ghi đồ thị
+x_test = torch.linspace(0, 1, 101).reshape(-1, 1).double()
+with torch.no_grad():
+    u_test = model(x_test)
+
+# Cần u'' để tính mômen: phải ghi đồ thị theo x
+x_m = x_test.clone().detach().requires_grad_(True)
+u_m = model(x_m)                    # không đặt trong no_grad
+u_x = torch.autograd.grad(u_m, x_m,
+                        torch.ones_like(u_m), create_graph=True)[0]
+u_xx = torch.autograd.grad(u_x, x_m,
+                         torch.ones_like(u_x), create_graph=False)[0]
+moment = -u_xx.detach()</code></pre><p><code>torch.no_grad()</code> dùng khi chỉ suy luận giá trị; không dùng khi lập residual hoặc tính mômen bằng autograd. <code>detach()</code> tách kết quả đã tính khỏi đồ thị trước khi lưu CSV hoặc vẽ. Nếu tắt <code>requires_grad</code> trên tensor đầu vào, hãy tính lại forward. Không tắt theo dõi trọng số trong lúc train, vì <code>loss.backward()</code> cần nó.</p><div class="task"><strong>Tự làm:</strong> thử bỏ <code>requires_grad=True</code> và quan sát lỗi; sau đó đổi <code>create_graph=False</code> ở đạo hàm đầu và thử lấy đạo hàm bậc hai. Cuối cùng giải thích tại sao ví dụ tính mômen không thể nằm trong <code>torch.no_grad()</code>.</div><div class="bottom-nav"><a class="button ghost" href="04c-pinn-pipeline.html">Tiếp: pipeline PINN →</a><a class="button" href="04d-pinn-code-walkthrough.html">Đọc mã PINN từng hàm →</a></div></section>
+<section class="panel"><p class="label">Đọc thêm</p><h2>Tài liệu PyTorch chính thức</h2><p>Để tra cứu kỹ hơn sau khi chạy ví dụ, xem <a href="https://docs.pytorch.org/docs/stable/notes/autograd" target="_blank" rel="noopener noreferrer">Autograd mechanics</a> và <a href="https://docs.pytorch.org/docs/stable/generated/torch.autograd.grad.html" target="_blank" rel="noopener noreferrer">torch.autograd.grad</a>. Hai trang này giải thích đồ thị phép toán, các chế độ tắt gradient và ý nghĩa của <code>grad_outputs</code>, <code>create_graph</code>.</p></section>
 </main><footer class="footer"><div class="wrap"><p><strong>intro2pinns</strong> · Python cho sinh viên cơ học tính toán</p><p><a href="index.html">Về lộ trình Python</a></p></div></footer></body></html>

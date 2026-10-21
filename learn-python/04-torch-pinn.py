@@ -92,18 +92,23 @@ def evaluate(model: nn.Module) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor
 def main() -> None:
     parser = argparse.ArgumentParser(description="Minimal PINN for normalized beam u''''=1")
     parser.add_argument("--steps", type=int, default=200, help="number of Adam steps")
-    parser.add_argument("--seed", type=int, default=7)
+    parser.add_argument("--seed", type=int, default=7, help="random seed for network initialization")
+    parser.add_argument("--n-collocation", type=int, default=32, help="number of interior PDE points")
+    parser.add_argument("--boundary-weight", type=float, default=10.0, help="weight of boundary loss")
+    parser.add_argument("--output-dir", type=Path, default=Path(__file__).resolve().parent / "outputs", help="directory for CSV results")
     args = parser.parse_args()
 
     verify_autograd()
-    model, history = train_pinn(steps=args.steps, seed=args.seed)
+    model, history = train_pinn(steps=args.steps, n_collocation=args.n_collocation,
+                                boundary_weight=args.boundary_weight, seed=args.seed)
     x, predicted, exact, predicted_moment, exact_moment, error_u, error_m = evaluate(model)
-    print(f"PyTorch {torch.__version__}; seed={args.seed}; steps={args.steps}")
+    print(f"PyTorch {torch.__version__}; seed={args.seed}; steps={args.steps}; "
+          f"n_collocation={args.n_collocation}; boundary_weight={args.boundary_weight}")
     print(f"loss: {history[0]:.4e} -> {history[-1]:.4e}")
     print(f"Relative errors: u={error_u:.4e}, M={error_m:.4e}")
 
-    output_dir = Path(__file__).resolve().parent / "outputs"
-    output_dir.mkdir(exist_ok=True)
+    output_dir = args.output_dir
+    output_dir.mkdir(parents=True, exist_ok=True)
     curve_path = output_dir / "pinn_curve.csv"
     loss_path = output_dir / "pinn_loss.csv"
     with curve_path.open("w", newline="", encoding="utf-8") as file:

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Đọc từng hàm PyTorch trong 04-torch-pinn.py và chạy thí nghiệm PINN trên CMD.">
+  <title>04d · Đọc mã PINN PyTorch · intro2pinns</title>
+  <link rel="stylesheet" href="tutorial.css">
+  <style>.formula{overflow-x:auto}.formula mjx-container[display="true"]{margin:.3em 0!important}pre{overflow-x:auto}.wide{overflow-x:auto}.wide table{border-collapse:collapse;width:100%;min-width:690px}.wide th,.wide td{padding:10px 12px;border-bottom:1px solid #d9e7e4;text-align:left;vertical-align:top}.wide th{background:#eaf4f1}.mini{color:#536b76;font-size:.94rem}</style>
+  <script>window.MathJax={tex:{tags:"none"},options:{skipHtmlTags:["script","noscript","style","textarea","pre","code"]}};</script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head>
+<body>
+<header class="topbar"><div class="wrap"><a class="brand" href="index.html">intro<span>2</span>pinns / Python</a><nav aria-label="Điều hướng"><a href="index.html">Tổng quan</a><a href="../beam-pinn-foundations.html#ban-do">Ý tưởng PINN</a><a href="04-torch-pinn.html">Bài 04</a><a href="colab.html">Colab</a></nav></div></header>
+<div class="hero"><div class="wrap"><p class="eyebrow">04d · Đọc mã từng bước</p><h1>Vì sao <code>04-torch-pinn.py</code> được viết như vậy?</h1><p>Từ tensor một điểm tới hàm chuyển vị, đạo hàm bậc bốn, vòng train và lệnh chạy CMD. Mỗi ví dụ dưới đây có thể thử riêng trước khi đọc script đầy đủ.</p><div class="chips"><span>Shape và tensor</span><span>nn.Sequential</span><span>autograd.grad</span><span>Adam</span><span>argparse</span></div></div></div>
+<main class="wrap">
+<section class="panel"><p class="label">00 · Ý tưởng</p><h2>Cùng một mạng, nhiều tọa độ</h2><p>Với bảng nghiệm, ta lưu sẵn các cặp \((x_i,u_i)\). Trong PINN, <code>model</code> là một hàm có tham số: <code>model(x)</code> tính chuyển vị ở tọa độ <code>x</code> bất kỳ trong miền. Ta không cung cấp bảng chuyển vị đúng khi train; ta buộc hàm dự đoán gần thỏa phương trình và điều kiện biên.</p><pre><code>import torch
+from torch import nn
+
+model = nn.Sequential(nn.Linear(1, 8), nn.Tanh(), nn.Linear(8, 1)).double()
+x = torch.tensor([[0.2], [0.5], [0.8]], dtype=torch.float64)
+y = model(x)
+print(x.shape, y.shape)  # [3, 1] và [3, 1]
+print(model(torch.tensor([[0.37]], dtype=torch.float64)))</code></pre><p>Mỗi hàng của <code>x</code> là một điểm. <code>nn.Linear(1,8)</code> biến một tọa độ thành tám đặc trưng; <code>nn.Tanh()</code> tạo tính phi tuyến; <code>nn.Linear(8,1)</code> trả một chuyển vị. Kết quả ở <code>0.37</code> có ngay cả khi điểm này chưa xuất hiện lúc train. Trước khi train, đó chỉ là dự đoán ngẫu nhiên.</p><div class="callout"><strong>Tự thử:</strong> đổi ba điểm đầu vào thành năm điểm. Shape đầu ra đổi thành gì? Tại sao không phải tạo thêm năm tham số chuyển vị?</div></section>
+<section class="panel"><p class="label">01 · Từ vựng PyTorch</p><h2>Những hàm xuất hiện trong script</h2><div class="wide"><table><thead><tr><th>Cú pháp</th><th>Ý nghĩa trong bài dầm</th><th>Điều dễ nhầm</th></tr></thead><tbody>
+<tr><td><code>torch.tensor(..., dtype=torch.float64)</code></td><td>Tạo tensor số thực 64 bit, dùng thống nhất cho điểm và mạng.</td><td>Tensor đầu vào và trọng số phải cùng dtype.</td></tr>
+<tr><td><code>torch.linspace(0, 1, 401)</code></td><td>Tạo 401 tọa độ đều để kiểm chứng sau train.</td><td>Gồm cả hai đầu, khác các điểm collocation nằm trong miền.</td></tr>
+<tr><td><code>.reshape(-1, 1)</code></td><td>Đưa vector 1D thành bảng có một cột: shape <code>(N,1)</code>.</td><td><code>-1</code> để PyTorch tự tính số hàng.</td></tr>
+<tr><td><code>.requires_grad_(True)</code></td><td>Cho phép lấy đạo hàm nghiệm theo tọa độ.</td><td>Không có nó, <code>autograd.grad</code> không lấy được đạo hàm theo <code>x</code>.</td></tr>
+<tr><td><code>nn.Linear(a,b)</code>, <code>nn.Tanh()</code></td><td>Lớp affine có trọng số và activation trơn.</td><td>Lớp đầu ra không có <code>Tanh</code> phía sau.</td></tr>
+<tr><td><code>.double()</code></td><td>Chuyển tham số mạng sang <code>float64</code>.</td><td>Đây là lựa chọn độ chính xác cho ví dụ, không phải điều kiện bắt buộc của mọi PINN.</td></tr>
+<tr><td><code>torch.autograd.grad(...)[0]</code></td><td>Lấy đạo hàm theo tọa độ chỉ định.</td><td>Hàm trả tuple; <code>[0]</code> lấy tensor gradient đầu tiên.</td></tr>
+<tr><td><code>torch.mean(r**2)</code>, <code>torch.sum(...)</code></td><td>Gộp residual thành một số vô hướng để tối ưu.</td><td><code>mean</code> chia theo số điểm; <code>sum</code> không chia.</td></tr>
+<tr><td><code>model.parameters()</code></td><td>Đưa các trọng số và bias cho Adam cập nhật.</td><td>Tọa độ <code>x</code> không thuộc danh sách tham số này.</td></tr>
+<tr><td><code>.detach()</code>, <code>.tolist()</code></td><td>Tách khỏi đồ thị đạo hàm rồi chuyển sang dữ liệu để ghi CSV.</td><td>Không <code>detach</code> trước khi tính loss trong vòng train.</td></tr>
+</tbody></table></div></section>
+<section class="panel"><p class="label">02 · derivative</p><h2>Vì sao phải gọi autograd nhiều lần?</h2><p>Trong <a href="04-torch-pinn.py">script</a>, <code>derivative(output, coordinate, order)</code> nhận giá trị của hàm, tọa độ và bậc đạo hàm. Một lần gọi <code>torch.autograd.grad</code> cho đạo hàm bậc một; vòng <code>for</code> lặp đúng <code>order</code> lần.</p><pre><code>def derivative(output, coordinate, order):
+    result = output
+    for _ in range(order):
+        result = torch.autograd.grad(
+            result, coordinate,
+            grad_outputs=torch.ones_like(result),
+            create_graph=True,
+        )[0]
+    return result</code></pre><p><code>grad_outputs=torch.ones_like(result)</code> tạo vector toàn số 1 cho phép lấy gradient khi <code>result</code> có nhiều phần tử. Vì mỗi hàng đi qua cùng một mạng nhưng không trộn với hàng khác, gradient trả về đúng đạo hàm tại từng điểm. <code>create_graph=True</code> giữ phép đạo hàm trong đồ thị tính toán: ta còn có thể lấy đạo hàm bậc tiếp theo và cho <code>loss.backward()</code> truyền ngược tới trọng số.</p><pre><code>x = torch.tensor([[0.2], [0.7]], dtype=torch.float64, requires_grad=True)
+p = x**4 - 2*x**3 + x
+print(derivative(p, x, 1))  # 4*x**3 - 6*x**2 + 1
+print(derivative(p, x, 4))  # 24 tại cả hai điểm</code></pre><p class="mini">Hàm helper này giả định đầu ra từng hàng chỉ phụ thuộc đầu vào cùng hàng. Nếu mô hình trộn các điểm với nhau, <code>grad_outputs=ones</code> cho đạo hàm của tổng đầu ra, không còn là từng đạo hàm riêng như ở đây.</p></section>
+<section class="panel"><p class="label">03 · verify_autograd và make_model</p><h2>Kiểm tra công cụ trước khi giải bài toán</h2><p><code>verify_autograd()</code> áp dụng helper lên \(p(x)=x^4-2x^3+x\), có \(p^{(4)}=24\). <code>torch.allclose</code> kiểm tra các giá trị tính được gần 24 trong sai số cho phép; <code>assert</code> dừng chương trình nếu kiểm tra thất bại. Đây là phép thử cú pháp/đạo hàm, chưa phải kiểm chứng PINN.</p><p><code>make_model()</code> tạo mạng <code>1 → 32 → 32 → 1</code>. Hai <code>Tanh</code> đặt sau hai lớp ẩn vì residual của dầm chứa đạo hàm bậc bốn. Nếu dùng ReLU, mạng theo một biến là hàm tuyến tính từng đoạn và đạo hàm bậc bốn bằng 0 hầu khắp nơi. Đầu ra cuối không bị chặn bởi activation. <code>.double()</code> khớp với tọa độ <code>float64</code>.</p><div class="callout"><strong>Tự thử:</strong> in <code>model</code>, sau đó in <code>sum(p.numel() for p in model.parameters())</code>. Con số đó là số tham số học được, không phải số điểm collocation.</div></section>
+<section class="panel"><p class="label">04 · train_pinn</p><h2>Mỗi dòng gắn với một công thức</h2><p><code>torch.manual_seed(seed)</code> cố định khởi tạo ngẫu nhiên để các lần chạy dễ đối chiếu; <code>torch.set_num_threads(1)</code> giúp ví dụ CPU nhỏ ổn định hơn về thời gian. Các điểm collocation được chọn ở <em>giữa</em> các ô con:</p><div class="formula">\[x_i=\frac{i+1/2}{N_c},\qquad i=0,\ldots,N_c-1.\]</div><pre><code>collocation = ((torch.arange(n_collocation, dtype=torch.float64)
+                + 0.5) / n_collocation).reshape(-1, 1).requires_grad_(True)
+boundary = torch.tensor([[0.0], [1.0]],
+                        dtype=torch.float64, requires_grad=True)</code></pre><p>Midpoint tránh đặt điểm PDE trùng hai đầu; hai đầu được kiểm tra riêng bằng <code>boundary</code>. Cả hai tensor cần gradient theo tọa độ. <code>model.parameters()</code> chỉ đưa trọng số mạng cho Adam; tọa độ không được optimizer cập nhật.</p><pre><code>optimizer.zero_grad()             # xóa gradient trọng số từ vòng trước
+u_c = model(collocation)          # chuyển vị tại điểm miền
+residual = derivative(u_c, collocation, 4) - 1.0
+loss_pde = torch.mean(residual**2)
+u_b = model(boundary)             # chuyển vị tại hai đầu
+u_b_xx = derivative(u_b, boundary, 2)
+loss_boundary = torch.sum(u_b**2 + u_b_xx**2)
+loss = loss_pde + boundary_weight * loss_boundary
+loss.backward()                   # đạo hàm loss theo trọng số mạng
+optimizer.step()                  # Adam cập nhật trọng số</code></pre><p><code>mean</code> ở miền đo sai số bình phương trung bình tại \(N_c\) điểm; <code>sum</code> ở biên cộng bốn sai số \(u(0),u(1),u''(0),u''(1)\). Hệ số <code>boundary_weight</code> cân hai phần loss. <code>loss.backward()</code> khác <code>derivative(...,4)</code>: một bên lấy đạo hàm theo <em>tham số mạng</em>, bên kia lấy theo <em>tọa độ</em>.</p><p><code>history.append(float(loss.detach()))</code> lưu một số Python thay vì giữ toàn bộ đồ thị autograd của mọi vòng. <code>collocation.grad = None</code> và <code>boundary.grad = None</code> xóa gradient ở tọa độ lá sau mỗi bước; optimizer chỉ phụ trách gradient của trọng số.</p></section>
+<section class="panel"><p class="label">05 · evaluate và main</p><h2>Kiểm chứng rồi mới lưu kết quả</h2><p><code>evaluate(model)</code> tạo 401 điểm để đánh giá, độc lập với các midpoint dùng để train. Tọa độ vẫn cần <code>requires_grad_(True)</code> vì mômen chuẩn hóa là \(-u_\theta''\). <code>torch.trapz</code> xấp xỉ tích phân của bình phương sai số và bình phương nghiệm đúng để tính sai số tương đối. <code>detach()</code> chỉ dùng sau khi đã tính xong nghiệm, mômen và sai số.</p><p><code>main()</code> đọc tùy chọn CMD bằng <code>argparse</code>, lần lượt gọi <code>verify_autograd</code>, <code>train_pinn</code>, <code>evaluate</code>, rồi ghi hai file CSV. <code>Path(__file__).resolve().parent</code> lấy thư mục chứa script để đường dẫn mặc định không phụ thuộc nơi mở CMD. Khối <code>if __name__ == "__main__":</code> khiến <code>main()</code> chạy khi gọi file trực tiếp; nếu import file như module, nó không tự huấn luyện.</p><div class="callout"><strong>Giới hạn của kiểm chứng trong script:</strong> sai số chuyển vị và mômen được tính trên lưới mới, nhưng script chưa in residual PDE cực đại trên lưới này hoặc từng sai số biên. Muốn kết luận sâu hơn, hãy bổ sung hai phép kiểm tra đó.</div></section>
+<section class="panel"><p class="label">06 · CMD trên Windows</p><h2>Chạy cùng một bài toán với input khác nhau</h2><p>Mở CMD, chuyển vào thư mục dự án. Dấu ngoặc kép giữ nguyên đường dẫn có khoảng trắng. Nếu <code>python</code> không trỏ tới môi trường đã cài PyTorch, hãy <code>conda activate</code> môi trường của dự án trước; xem <a href="01-cmd-python.html">bài CMD và Python</a>.</p><pre><code>cd /d "D:\Dropbox\share\nvnkrus\teach_fem\mathspace\project\nguyen_minh_nhan\intro2pinns\learn-python"
+python 04-torch-pinn.py --help
+python 04-torch-pinn.py</code></pre><p>Chạy mặc định dùng 200 bước Adam, 32 điểm collocation, trọng số biên 10 và seed 7. Muốn lưu riêng từng thí nghiệm, dùng <code>--output-dir</code>; nếu bỏ tùy chọn này, CSV trong thư mục <code>outputs</code> sẽ bị ghi đè bởi lần chạy sau.</p><pre><code>python 04-torch-pinn.py --steps 100 --output-dir outputs\steps100
+python 04-torch-pinn.py --steps 400 --output-dir outputs\steps400
+python 04-torch-pinn.py --n-collocation 64 --output-dir outputs\points64
+python 04-torch-pinn.py --boundary-weight 100 --output-dir outputs\bc100
+python 04-torch-pinn.py --seed 8 --output-dir outputs\seed8</code></pre><p>Ở mỗi cặp đối chiếu, chỉ đổi <strong>một</strong> tùy chọn; các tùy chọn còn lại dùng giá trị mặc định. Mỗi thư mục chứa <code>pinn_curve.csv</code> (tọa độ, nghiệm và mômen) và <code>pinn_loss.csv</code> (loss theo bước). Dòng CMD in sai số tương đối \(u\) và \(M\), phù hợp để ghi vào bảng báo cáo.</p><div class="wide"><table><thead><tr><th>Tùy chọn</th><th>Giá trị mặc định</th><th>Câu hỏi thực nghiệm</th></tr></thead><tbody><tr><td><code>--steps</code></td><td>200</td><td>Thêm bước tối ưu có giảm sai số kiểm chứng không?</td></tr><tr><td><code>--n-collocation</code></td><td>32</td><td>Kiểm tra PDE ở nhiều điểm hơn có cải thiện nghiệm không?</td></tr><tr><td><code>--boundary-weight</code></td><td>10</td><td>Nhấn mạnh biên có đổi sai số chuyển vị/mômen không?</td></tr><tr><td><code>--seed</code></td><td>7</td><td>Kết quả có nhạy với khởi tạo ngẫu nhiên không?</td></tr><tr><td><code>--output-dir</code></td><td><code>outputs</code></td><td>Lưu từng lần chạy để không ghi đè CSV.</td></tr></tbody></table></div><p><strong>Đọc kết quả:</strong> <code>loss</code> là sai số residual có trọng số tại điểm train; <code>Relative errors</code> so nghiệm/mômen với nghiệm giải tích trên lưới mới. Hai đại lượng không cùng ý nghĩa, nên không kỳ vọng chúng có cùng trị số.</p><div class="task"><strong>Bài tập:</strong> chạy mặc định, <code>--steps 400</code>, <code>--n-collocation 64</code> và <code>--seed 8</code> vào bốn thư mục khác nhau. Lập bảng cấu hình, loss cuối, sai số \(u\), sai số \(M\); giải thích vì sao kết quả đổi.</div></section>
+<section class="panel"><p class="label">Tài liệu tiếp theo</p><h2>Đọc và chạy</h2><p><a class="button" href="04-torch-pinn.py">Mở script đầy đủ</a> <a class="button ghost" href="04-torch-pinn.html">Quay về bài 04</a> <a class="button ghost" href="04-torch-pinn.ipynb">Mở notebook</a></p></section>
+</main><footer class="footer"><div class="wrap"><p><strong>intro2pinns</strong> · Học từng thành phần trước khi thay bài toán.</p><p><a href="../beam-pinn-foundations.html">Cơ sở PINN cho dầm</a></p></div></footer>
+</body></html>

@@ -1,0 +1,74 @@
+﻿<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="PINN TensorFlow cho dầm Euler–Bernoulli: GradientTape, residual, loss, train và kiểm chứng; đối chiếu với Katsikis 2022.">
+  <title>PINN cho dầm bằng TensorFlow · intro2pinns</title>
+  <link rel="stylesheet" href="learn-python/tutorial.css">
+  <style>.formula{overflow-x:auto}.formula mjx-container[display="true"]{margin:.3em 0!important}.wide{overflow-x:auto}.wide table{border-collapse:collapse;width:100%;min-width:680px}.wide th,.wide td{padding:10px 12px;text-align:left;vertical-align:top;border-bottom:1px solid #d9e2e4}.wide th{background:#edf5f3}.figure{max-width:720px;width:100%;display:block;margin:16px auto}.subtle{font-size:.93rem;color:#526473}</style>
+  <script>window.MathJax={tex:{tags:"none"},options:{skipHtmlTags:["script","noscript","style","textarea","pre","code"]}};</script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head>
+<body>
+<header class="topbar"><div class="wrap"><a class="brand" href="index.html">intro<span>2</span>pinns</a><nav aria-label="Điều hướng"><a href="index.html">Trang chủ</a><a href="beam-pinn-foundations.html">Bản PyTorch</a><a href="learn-python/index.html">Học Python</a><a href="reading-guide.html">Tài liệu đọc</a></nav></div></header>
+<div class="hero"><div class="wrap"><p class="eyebrow">Bài đọc nền · TensorFlow / Keras</p><h1>Từ phương trình dầm đến PINN bằng TensorFlow</h1><p>Cùng bài toán và cùng loss với bản PyTorch. Ta thay autograd của PyTorch bằng <code>tf.GradientTape</code> để đọc mã Katsikis, Muradova và Stavroulakis (2022) dễ hơn.</p><div class="chips"><span>Dầm Euler–Bernoulli 1D</span><span>GradientTape lồng nhau</span><span>Keras + Adam</span><span>Train → verify → improve</span></div></div></div>
+<main class="wrap">
+<section class="panel"><p class="label">00 · Hai bản song song</p><h2>PINN học hàm chuyển vị \(u_\theta(x)\)</h2><p>Mạng nhận một tọa độ và trả một chuyển vị. Các tọa độ collocation dùng để <em>đánh giá phương trình</em>, không phải các cặp chuyển vị đúng để mạng học thuộc. Sau train, cùng mạng có thể dự đoán tại điểm mới. TensorFlow và PyTorch thực hiện cùng toán học; sự khác biệt nằm ở cú pháp lấy đạo hàm và cập nhật tham số.</p><img class="figure" src="assets/pinn-network.svg" alt="Sơ đồ tọa độ qua các lớp mạng tanh đến chuyển vị dự đoán"><div class="callout">Đây là bản triển khai học tập để đối chiếu với <a href="beam-pinn-foundations.html">trang PyTorch</a> và <a href="https://doi.org/10.15377/2409-5761.2022.09.8" target="_blank" rel="noopener noreferrer">bài Katsikis và cộng sự</a>; không phải bản chép nguyên mã hay toàn bộ thí nghiệm của bài báo.</div></section>
+<section class="panel"><p class="label">01 · Bài toán chung</p><h2>Dầm tựa đơn, tải phân bố đều</h2><p>Với độ cứng \(EI\) không đổi, tải \(q_0\) và chiều dài \(L\), chuyển vị \(w\) dương theo chiều tải thỏa:</p><div class="formula">\[EIw^{(4)}(x)=q_0,\quad 0&lt;x&lt;L;\qquad w(0)=w\(L\)=w''(0)=w''\(L\)=0.\]</div><p>Đặt \(\xi=x/L\) và \(u(\xi)=EIw(L\xi)/(q_0L^4)\). Ta giải bài toán phi thứ nguyên:</p><div class="formula">\[u^{(4)}(\xi)=1,\quad 0&lt;\xi&lt;1;\qquad u(0)=u(1)=u''(0)=u''(1)=0.\]</div><p>Nghiệm đúng \(u_*(\xi)=(\xi^4-2\xi^3+\xi)/24\) và mômen chuẩn hóa \(\bar M_*(\xi)=-u_*''(\xi)=\xi(1-\xi)/2\) chỉ dùng để kiểm chứng <em>sau</em> train. Cách chuẩn hóa tránh trộn thang rất khác nhau của \(E,I,q_0,L\) trong ví dụ nhập môn.</p><div class="callout"><strong>Quy ước dấu khi đọc Katsikis:</strong> phương trình (4.12) trong bài viết \(y^{(4)}=-q/(EI)\). Ở đây \(w\) dương theo chiều tải nên \(w^{(4)}=+q/(EI)\); đặt \(w=-y\) thì hai cách viết tương ứng. Hãy giữ một quy ước nhất quán cho nghiệm, mômen và residual.</div></section>
+<section class="panel"><p class="label">02 · Mạng Keras</p><h2>Định nghĩa hàm dự đoán</h2><pre><code>import tensorflow as tf
+tf.keras.backend.set_floatx("float64")  # trước khi tạo lớp
+tf.keras.utils.set_random_seed(7)
+
+model = tf.keras.Sequential([
+    tf.keras.Input(shape=(1,)),
+    tf.keras.layers.Dense(32, activation="tanh"),
+    tf.keras.layers.Dense(32, activation="tanh"),
+    tf.keras.layers.Dense(1),
+])</code></pre><p><code>Dense(32)</code> là lớp kết nối đầy đủ với 32 neuron; <code>tanh</code> trơn để lấy đạo hàm bậc bốn. Lớp cuối không có activation, đúng tinh thần kiến trúc trong Katsikis. Bản này dùng mạng \(1\to32\to32\to1\); số lớp và neuron trong các bảng thí nghiệm của bài báo khác.</p><div class="callout warn"><strong>Không dùng ReLU cho baseline dạng mạnh này:</strong> một mạng ReLU theo một biến là hàm tuyến tính từng đoạn; đạo hàm bậc bốn bằng 0 ở hầu hết các điểm, không thể khớp residual \(u^{(4)}-1\) bằng cách thông thường.</div></section>
+<section class="panel"><p class="label">03 · GradientTape</p><h2>Vì sao cần bốn tape lồng nhau?</h2><p><code>tf.Tensor</code> tọa độ không được theo dõi tự động. <code>tape.watch(x)</code> phải được gọi <em>trước</em> khi tính <code>model(x)</code>. Mỗi tape tạo một đạo hàm; khi đạo hàm nằm trong phạm vi tape ngoài, phép đạo hàm đó cũng được ghi lại để lấy đạo hàm bậc tiếp.</p><pre><code>def beam_derivatives(model, x):
+    with tf.GradientTape() as tape4:
+        tape4.watch(x)
+        with tf.GradientTape() as tape3:
+            tape3.watch(x)
+            with tf.GradientTape() as tape2:
+                tape2.watch(x)
+                with tf.GradientTape() as tape1:
+                    tape1.watch(x)
+                    u = model(x)
+                u1 = tape1.gradient(u, x)
+            u2 = tape2.gradient(u1, x)
+        u3 = tape3.gradient(u2, x)
+    u4 = tape4.gradient(u3, x)
+    return u, u2, u4</code></pre><p><code>gradient(u,x)</code> lấy gradient của tổng các giá trị đầu ra theo <code>x</code>. Vì mạng Dense xử lý mỗi hàng độc lập, nó cho đạo hàm tại từng điểm. Nếu mô hình trộn các hàng, cách hiểu này không còn đúng. Bốn tape chỉ dùng một lần mỗi tape; không cần <code>persistent=True</code>.</p><p><strong>Thử trước với đa thức:</strong></p><pre><code>x = tf.constant([[0.25], [0.75]], dtype=tf.float64)
+poly = lambda x: x**4 - 2*x**3 + x
+# Trong script, thay model bằng một callable trả poly(x) để kiểm tra u4 = 24.
+_, _, fourth = beam_derivatives(poly, x)
+print(fourth.numpy().reshape(-1))  # [24. 24.]</code></pre><p>Ở đây <code>poly</code> là hàm Python nhận tensor rồi trả tensor; nhờ vậy kiểm tra được helper đạo hàm trước khi dùng mạng chưa biết nghiệm.</p></section>
+<section class="panel"><p class="label">04 · Residual và loss</p><h2>Vật lý đi vào huấn luyện ở đâu?</h2><p>Chọn \(N_c\) điểm trong miền và hai tọa độ biên. Tại miền, đo \(r=u_\theta^{(4)}-1\); ở biên, đo chuyển vị và đạo hàm bậc hai.</p><div class="formula">\[\mathcal L_{\rm PDE}=\frac1{N_c}\sum_i [u_\theta^{(4)}(\xi_i)-1]^2,\qquad \mathcal L_{\rm BC}=u_\theta(0)^2+u_\theta(1)^2+u_\theta''(0)^2+u_\theta''(1)^2.\]</div><pre><code>n = 32
+x_c = tf.reshape((tf.cast(tf.range(n), tf.float64) + 0.5)/n, (-1, 1))
+x_b = tf.constant([[0.0], [1.0]], dtype=tf.float64)
+
+_, _, u4_c = beam_derivatives(model, x_c)
+u_b, u2_b, _ = beam_derivatives(model, x_b)
+loss_pde = tf.reduce_mean((u4_c - 1.0)**2)
+loss_bc = tf.reduce_sum(u_b**2 + u2_b**2)
+loss = loss_pde + 10.0*loss_bc</code></pre><p>Trong bài Katsikis, các residual phương trình và điều kiện biên được đưa thành những đầu ra có giá trị đích bằng 0 của một mô hình Keras PINN. Ở đây ta viết loss trực tiếp để thấy công thức rõ hơn. Hai cách đều tối thiểu hóa cùng loại sai lệch, nhưng cách nhóm và trọng số loss có thể khác.</p></section>
+<section class="panel"><p class="label">05 · Train</p><h2>Tape ngoài cập nhật trọng số, tape trong lấy đạo hàm theo tọa độ</h2><pre><code>optimizer = tf.keras.optimizers.Adam(learning_rate=0.005)
+history = []
+for step in range(300):
+    with tf.GradientTape() as tape_theta:
+        _, _, u4_c = beam_derivatives(model, x_c)
+        u_b, u2_b, _ = beam_derivatives(model, x_b)
+        loss_pde = tf.reduce_mean((u4_c - 1.0)**2)
+        loss_bc = tf.reduce_sum(u_b**2 + u2_b**2)
+        loss = loss_pde + 10.0*loss_bc
+    weights = model.trainable_variables
+    gradients = tape_theta.gradient(loss, weights)
+    optimizer.apply_gradients(zip(gradients, weights))
+    history.append(float(loss.numpy()))</code></pre><p>Tape trong tính \(\partial^4u_\theta/\partial\xi^4\); tape ngoài tính \(\partial\mathcal L/\partial\theta\). <code>apply_gradients</code> là bước thay đổi trọng số. Không cần dữ liệu \((\xi,u_*)\) trong loss này. Viết vòng lặp bằng tay giúp sinh viên đối chiếu rõ hơn với <code>optimizer.zero_grad()</code>, <code>loss.backward()</code>, <code>optimizer.step()</code> của PyTorch.</p></section>
+<section class="panel"><p class="label">06 · Verify và improve</p><h2>Đừng kết luận chỉ từ loss train</h2><p>Sau huấn luyện, đánh giá \(u_\theta\), \(\bar M_\theta=-u_\theta''\), residual PDE và điều kiện biên trên lưới dày chưa dùng để train. So với \(u_*\) và \(\bar M_*\) bằng sai số tương đối; ghi thời gian chạy và ít nhất ba seed nếu nghiên cứu độ ổn định.</p><div class="wide"><table><thead><tr><th>Điều chỉnh một yếu tố</th><th>Câu hỏi</th><th>Giữ cố định</th></tr></thead><tbody><tr><td>Số điểm collocation</td><td>Residual giữa các điểm train có giảm không?</td><td>Mạng, seed, bước train, loss weight</td></tr><tr><td>Trọng số biên</td><td>Biên cải thiện nhưng sai số trong miền đổi thế nào?</td><td>Các cấu hình còn lại</td></tr><tr><td>Kiến trúc / activation trơn</td><td>Sai số và thời gian có đổi không?</td><td>Điểm, optimizer, số bước, seed</td></tr><tr><td>Adam và L-BFGS</td><td>Kết quả có ổn định qua nhiều seed không?</td><td>Cùng bài toán, chuẩn đánh giá, ngân sách</td></tr></tbody></table></div><p>Bài Katsikis khảo sát thanh chịu lực dọc và ba loại điều kiện biên dầm, cùng số lớp/neuron, batch, epoch và số điểm collocation. Tác giả dùng <code>tanh</code> trong mọi ví dụ; họ không làm so sánh activation. Bài báo thấy Adam ổn định hơn L-BFGS trong thí nghiệm thanh của họ; không nên xem đó là kết luận chung cho mọi PINN.</p></section>
+<section class="panel"><p class="label">07 · Chạy mã và đối chiếu</p><h2>Bắt đầu từ script tối giản</h2><p><a class="button" href="learn-python/04-tensorflow-pinn.py">Xem script TensorFlow</a> <a class="button ghost" href="beam-pinn-foundations.html">So với bản PyTorch</a></p><pre><code>python 04-tensorflow-pinn.py --help
+python 04-tensorflow-pinn.py --steps 300 --output-dir outputs-tf\baseline
+python 04-tensorflow-pinn.py --n-collocation 64 --output-dir outputs-tf\points64</code></pre><p>Chạy các lệnh trên trong thư mục <code>learn-python</code> sau khi đã cài TensorFlow theo <a href="https://www.tensorflow.org/install" target="_blank" rel="noopener noreferrer">hướng dẫn chính thức</a>; trên Colab, kiểm tra <code>import tensorflow as tf</code> trước. Script lưu CSV nghiệm, mômen và lịch sử loss để đối chiếu với bản PyTorch. Hai framework có thể cho kết quả số khác vì cách khởi tạo và cài đặt optimizer; không so trực tiếp hai seed bằng nhau như thể chúng tạo cùng một mạng ban đầu.</p><p class="subtle">Mã được kiểm tra cú pháp tại đây; môi trường làm việc hiện không có TensorFlow để chạy huấn luyện. Tài liệu API: <a href="https://www.tensorflow.org/api_docs/python/tf/GradientTape" target="_blank" rel="noopener noreferrer">tf.GradientTape</a> và <a href="https://www.tensorflow.org/guide/advanced_autodiff" target="_blank" rel="noopener noreferrer">đạo hàm bậc cao</a>.</p></section>
+</main><footer class="footer"><div class="wrap"><p><strong>intro2pinns</strong> · Cùng bài toán, hai cách viết autograd.</p><p><a href="beam-pinn-foundations.html">Bản PyTorch</a> · <a href="index.html">Trang chủ</a></p></div></footer>
+</body></html>
