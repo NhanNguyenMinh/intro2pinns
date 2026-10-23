@@ -14,7 +14,9 @@ import tensorflow as tf
 
 def beam_derivatives(model, x):
     """Trả u, u'' và u''''; các hàng đầu vào độc lập với nhau."""
+    # Tape lồng nhau: tape1 lấy u', tape2 lấy u'', ... tape4 lấy u''''.
     with tf.GradientTape() as tape4:
+        # x là hằng Tensor; watch(x) yêu cầu tape theo dõi để đạo hàm theo tọa độ.
         tape4.watch(x)
         with tf.GradientTape() as tape3:
             tape3.watch(x)
@@ -45,12 +47,14 @@ def train_pinn(steps=300, n_collocation=32, boundary_weight=10.0, seed=7):
     tf.keras.utils.set_random_seed(seed)
     model = make_model()
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.005)
+    # Điểm giữa các ô cho PDE và hai đầu dầm cho điều kiện biên.
     indices = tf.cast(tf.range(n_collocation), tf.float64)
     x_c = tf.reshape((indices + 0.5) / n_collocation, (-1, 1))
     x_b = tf.constant([[0.0], [1.0]], dtype=tf.float64)
     history = []
 
     for _ in range(steps):
+        # Tape ngoài ghi các phép tính loss để lấy gradient theo trọng số mạng.
         with tf.GradientTape() as tape_theta:
             _, _, u4_c = beam_derivatives(model, x_c)
             u_b, u2_b, _ = beam_derivatives(model, x_b)
@@ -58,8 +62,10 @@ def train_pinn(steps=300, n_collocation=32, boundary_weight=10.0, seed=7):
             loss_bc = tf.reduce_sum(u_b ** 2 + u2_b ** 2)
             loss = loss_pde + boundary_weight * loss_bc
         weights = model.trainable_variables
+        # GradientTape tính d(loss)/d(weights); optimizer dùng gradient để cập nhật.
         gradients = tape_theta.gradient(loss, weights)
         optimizer.apply_gradients(zip(gradients, weights))
+        # Chuyển loss thành số Python để không giữ đồ thị tính toán trong lịch sử.
         history.append(float(loss.numpy()))
     return model, history
 

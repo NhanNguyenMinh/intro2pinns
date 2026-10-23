@@ -25,7 +25,7 @@ print(x_c.shape,x_b.shape)
 <p>Bốn tape lấy u''''. Chúng phải nằm trong tape_theta của bước train để loss còn truyền gradient về trọng số.</p></section>
 <section class='panel'><p class='label'>Thử trong notebook</p><pre><code>def derivatives(model,x):
     with tf.GradientTape() as t4:
-        t4.watch(x)
+        t4.watch(x)  # theo dõi x hằng để lấy đạo hàm theo tọa độ
         with tf.GradientTape() as t3:
             t3.watch(x)
             with tf.GradientTape() as t2:
@@ -43,15 +43,15 @@ print(x_c.shape,x_b.shape)
 <p>Loss PDE là trung bình bình phương u''''-1. Loss biên cộng bình phương u và u'' ở hai đầu. Tape ngoài lấy đạo hàm loss theo trọng số; Adam cập nhật chúng.</p></section>
 <section class='panel'><p class='label'>Thử trong notebook</p><pre><code>optimizer=tf.keras.optimizers.Adam(learning_rate=0.005)
 def train_step():
-    with tf.GradientTape() as tape_theta:
+    with tf.GradientTape() as tape_theta:  # ghi loss theo trọng số
         _,_,u4_c=derivatives(model,x_c)
         u_b,u2_b,_=derivatives(model,x_b)
         loss_pde=tf.reduce_mean((u4_c-1.0)**2)
         loss_bc=tf.reduce_sum(u_b**2+u2_b**2)
         loss=loss_pde+10.0*loss_bc
     weights=model.trainable_variables
-    gradients=tape_theta.gradient(loss,weights)
-    optimizer.apply_gradients(zip(gradients,weights))
+    gradients=tape_theta.gradient(loss,weights)  # d(loss)/d(weights)
+    optimizer.apply_gradients(zip(gradients,weights))  # cập nhật một step
     return float(loss_pde),float(loss_bc),float(loss)
 print(&#x27;một bước:&#x27;,train_step())
 </code></pre></section>

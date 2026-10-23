@@ -17,6 +17,7 @@ def derivative(output: torch.Tensor, coordinate: torch.Tensor, order: int) -> to
     """Đạo hàm theo tọa độ; mỗi đầu ra chỉ phụ thuộc vào điểm đầu vào cùng hàng."""
     result = output
     for _ in range(order):
+        # create_graph=True giữ đồ thị của đạo hàm để tính tiếp bậc cao và backprop theo trọng số.
         result = torch.autograd.grad(
             result,
             coordinate,
@@ -52,22 +53,29 @@ def train_pinn(steps: int = 200, n_collocation: int = 32, boundary_weight: float
     torch.set_num_threads(1)
     model = make_model()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.005)
+    # Điểm giữa các ô: nơi đo residual PDE; cần gradient theo x để lấy u''''.
     collocation = ((torch.arange(n_collocation, dtype=torch.float64) + 0.5) / n_collocation).reshape(-1, 1).requires_grad_(True)
+    # Hai đầu dầm: cần gradient theo x để lấy u'' trong điều kiện biên.
     boundary = torch.tensor([[0.0], [1.0]], dtype=torch.float64, requires_grad=True)
     history = []
 
     for _ in range(steps):
+        # PyTorch cộng dồn gradient mặc định; xóa gradient trọng số từ step trước.
         optimizer.zero_grad()
         u_c = model(collocation)
+        # Residual của u''''=1; bình phương rồi lấy trung bình trên điểm miền.
         residual = derivative(u_c, collocation, 4) - 1.0
         loss_pde = torch.mean(residual**2)
 
         u_b = model(boundary)
+        # Điều kiện tựa đơn: u=0 và u''=0 ở cả hai đầu.
         u_b_xx = derivative(u_b, boundary, 2)
         loss_boundary = torch.sum(u_b**2 + u_b_xx**2)
         loss = loss_pde + boundary_weight * loss_boundary
+        # Tính gradient của loss theo các trọng số mạng, rồi Adam cập nhật chúng.
         loss.backward()
         optimizer.step()
+        # Lưu một số thực, không giữ đồ thị autograd của mọi step trong history.
         history.append(float(loss.detach()))
 
         # Tọa độ là lá của đồ thị autograd; không dùng gradient theo tọa độ để tối ưu.
@@ -77,6 +85,7 @@ def train_pinn(steps: int = 200, n_collocation: int = 32, boundary_weight: float
 
 
 def evaluate(model: nn.Module) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, float, float]:
+    # Lưới kiểm chứng độc lập; vẫn cần gradient theo x để tính mômen -u''.
     coordinate = torch.linspace(0, 1, 401, dtype=torch.float64).reshape(-1, 1).requires_grad_(True)
     predicted = model(coordinate)
     predicted_moment = -derivative(predicted, coordinate, 2)
