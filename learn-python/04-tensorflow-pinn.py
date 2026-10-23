@@ -6,6 +6,7 @@ Chạy: python 04-tensorflow-pinn.py --steps 300
 
 import argparse
 import csv
+import time
 from pathlib import Path
 
 import tensorflow as tf
@@ -88,12 +89,15 @@ def main():
     args = parser.parse_args()
 
     tf.keras.backend.set_floatx("float64")  # gọi trước khi tạo các lớp Dense
+    started = time.perf_counter()
     model, history = train_pinn(args.steps, args.n_collocation,
                                 args.boundary_weight, args.seed)
+    train_seconds = time.perf_counter() - started
     x, predicted, exact, moment, exact_moment, error_u, error_m = evaluate(model)
     print(f"TensorFlow {tf.__version__}; seed={args.seed}; steps={args.steps}; "
           f"n_collocation={args.n_collocation}; boundary_weight={args.boundary_weight}")
     print(f"loss: {history[0]:.4e} -> {history[-1]:.4e}")
+    print(f"Training time: {train_seconds:.3f} s")
     print(f"Relative errors: u={error_u:.4e}, M={error_m:.4e}")
 
     args.output_dir.mkdir(parents=True, exist_ok=True)

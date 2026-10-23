@@ -6,6 +6,7 @@ Chạy trong CMD: python 04-torch-pinn.py --steps 200
 
 import argparse
 import csv
+import time
 from pathlib import Path
 
 import torch
@@ -99,12 +100,15 @@ def main() -> None:
     args = parser.parse_args()
 
     verify_autograd()
+    started = time.perf_counter()
     model, history = train_pinn(steps=args.steps, n_collocation=args.n_collocation,
                                 boundary_weight=args.boundary_weight, seed=args.seed)
+    train_seconds = time.perf_counter() - started
     x, predicted, exact, predicted_moment, exact_moment, error_u, error_m = evaluate(model)
     print(f"PyTorch {torch.__version__}; seed={args.seed}; steps={args.steps}; "
           f"n_collocation={args.n_collocation}; boundary_weight={args.boundary_weight}")
     print(f"loss: {history[0]:.4e} -> {history[-1]:.4e}")
+    print(f"Training time: {train_seconds:.3f} s")
     print(f"Relative errors: u={error_u:.4e}, M={error_m:.4e}")
 
     output_dir = args.output_dir
