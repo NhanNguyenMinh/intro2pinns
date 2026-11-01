@@ -1,0 +1,120 @@
+% !TeX program = xelatex
+% Mẫu báo cáo 7 ngày. Thay mọi ô [Điền ...] bằng dữ liệu thực; không giữ bảng trống khi nộp.
+\documentclass[12pt,a4paper]{article}
+\usepackage{fontspec}
+\IfFontExistsTF{DejaVu Serif}{\setmainfont{DejaVu Serif}}{\setmainfont{Times New Roman}}
+\usepackage{amsmath,amssymb,graphicx,booktabs,geometry,xcolor,hyperref}
+\geometry{margin=2.4cm}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,urlcolor=blue!55!black}
+\newcommand{\todo}[1]{\textcolor{red!70!black}{[Điền: #1]}}
+\newcommand{\boxfigure}[1]{\fbox{\parbox[c][4cm][c]{.88\linewidth}{\centering #1\\\small Thay khung này bằng \texttt{\string\includegraphics}.}}}
+\title{So sánh FEM và mixed PINN cho bài toán dầm Euler--Bernoulli}
+\author{Nguyễn Lin Đa \and Trà Minh Thiện \and Võ Trần Tiến\\[2mm]
+  \small Người hướng dẫn: TS. Nguyễn Minh Nhân}
+\date{Báo cáo kết quả sau 7 ngày}
+\begin{document}
+\maketitle
+\begin{abstract}
+\noindent
+Nghiên cứu khảo sát bài toán dầm tựa đơn chịu tải phân bố đều. Chúng tôi xây dựng nghiệm giải tích và nghiệm FEM Hermite làm mốc kiểm chứng, sau đó thử nghiệm physics-informed neural network dạng hỗn hợp (mixed PINN) dự đoán đồng thời chuyển vị và mômen có dấu. \todo{1 câu về trường hợp đã chạy, số liệu sai số chính và kết luận có giới hạn.} Báo cáo này ghi rõ các phần đã hoàn thành trong 7 ngày và phần dự định làm tiếp; không xem loss huấn luyện là sai số nghiệm.
+\end{abstract}
+
+\section{Câu hỏi nghiên cứu và phạm vi}
+\textbf{Câu hỏi:} Trên cùng bài toán dầm, nghiệm mixed PINN chính xác đến đâu so với nghiệm giải tích và FEM, và chi phí tính toán ra sao? Nếu đã hoàn thành trường hợp độ cứng hai đoạn, bổ sung câu hỏi: sai số và điều kiện ghép tại mặt nối thay đổi thế nào?
+
+\textbf{Phạm vi tối thiểu trong 7 ngày:} dầm tĩnh một chiều với $L=q_0=EI=1$. Trường hợp mở rộng chỉ thực hiện sau khi baseline hoạt động: $D(x)=EI(x)$ gồm hai đoạn với $D_1=1$, $D_2=0.2$, $a=0.4$. \todo{Ghi rõ trường hợp nào đã làm, trường hợp nào chưa làm.}
+
+\section{Mô hình toán và nghiệm tham chiếu}
+Lấy chuyển vị $w$ dương hướng xuống, $D=EI>0$ và mômen có dấu $m=Dw''$; mômen dương theo quy ước kết cấu là $M=-m$. Bài toán dầm tựa đơn là
+\begin{equation}\label{eq:beam}
+  (D(x)w''(x))''=q_0,\quad x\in(0,L),\qquad
+  w(0)=w(L)=m(0)=m(L)=0.
+\end{equation}
+Với $L=q_0=D=1$, nghiệm chính xác và mômen có dấu là
+\begin{equation}\label{eq:exact}
+  w_*(x)=\frac{x^4-2x^3+x}{24},\qquad
+  m_*(x)=\frac{x^2-x}{2}.
+\end{equation}
+\todo{Trình bày 3--5 dòng kiểm tra nghiệm (thế vào phương trình và bốn điều kiện biên).}
+
+Nếu khảo sát dầm hai đoạn, đặt $D(x)=D_1$ khi $x<a$ và $D(x)=D_2$ khi $x>a$. Không có lực hoặc mômen tập trung tại $a$ thì
+\begin{equation}\label{eq:interface}
+  [w]_a=[w']_a=[m]_a=[m']_a=0,qquad [g]_a=g(a^+)-g(a^-).
+\end{equation}
+Ở bài toán tĩnh tựa đơn chịu tải đều $q_0=1$, $m_*(x)=(x^2-x)/2$ vẫn đúng. Có thể dựng $w_*$ bằng tích phân chia tại $a$:
+\begin{equation}\label{eq:reference}
+ w_*(x)=\int_0^x(x-s)\frac{m_*(s)}{D(s)}\,ds
+ -x\int_0^1(1-s)\frac{m_*(s)}{D(s)}\,ds.
+\end{equation}
+\todo{Nếu chưa làm dầm hai đoạn, ghi ``Chưa thực hiện trong 7 ngày'' thay vì đưa đồ thị không có dữ liệu.}
+
+\section{Phương pháp FEM Hermite}
+Dạng yếu của \eqref{eq:beam} là: tìm $w\in H^2(0,L)$ thỏa $w(0)=w(L)=0$ sao cho với mọi hàm thử $v$ thỏa $v(0)=v(L)=0$,
+\begin{equation}\label{eq:weak}
+  \int_0^L D(x)w''v''\,dx=\int_0^L q_0v\,dx.
+\end{equation}
+Mỗi nút phần tử Hermite có chuyển vị $w_i$ và góc xoay $\theta_i$. Với $w_h=\mathbf N\mathbf d_e$, $\mathbf B=\mathbf N''$, ma trận và vector phần tử là
+\begin{equation}\label{eq:fem}
+  \mathbf K_e=\int_e D\mathbf B^{\mathsf T}\mathbf B\,dx,\qquad
+  \mathbf f_e=\int_e q_0\mathbf N^{\mathsf T}\,dx.
+\end{equation}
+\todo{Nêu cách lắp ghép, áp $w(0)=w(L)=0$, số phần tử đã thử và cách tính $m_h=Dw_h''$.}
+
+\section{Phương pháp mixed PINN}
+Mạng $x\mapsto(w_\theta(x),m_\theta(x))$ có hai đầu ra. Thay vì đạo hàm bậc bốn của $w_\theta$, ta dùng hai residual bậc hai:
+\begin{equation}\label{eq:mixed}
+ r_c(x)=m_\theta(x)-D(x)w_\theta''(x),\qquad
+ r_e(x)=m_\theta''(x)-q_0.
+\end{equation}
+Trên miền có $D$ không đổi, một loss mẫu là
+\begin{equation}\label{eq:loss}
+ \mathcal L=\lambda_c\operatorname{MSE}(r_c)
+ +\lambda_e\operatorname{MSE}(r_e)
+ +\lambda_b\{w_\theta(0)^2+w_\theta(L)^2+m_\theta(0)^2+m_\theta(L)^2\}.
+\end{equation}
+Nếu dùng hai mạng cho hai đoạn, cộng thêm $\lambda_I\sum_{g\in\{w,w',m,m'\}}[g]_a^2$ và tính residual riêng ở từng đoạn. \todo{Ghi số lớp/neuron, activation, dtype, seed, số điểm collocation, optimizer, learning rate, số bước cập nhật và mọi $\lambda$.}
+
+\section{Thiết kế so sánh và kết quả}
+Đánh giá trên cùng một lưới độc lập với điểm train. Với $g\in\{w,m\}$, dùng
+\begin{equation}\label{eq:error}
+ E_{L^2}(g)=\left(\frac{\int_0^L|g_h-g_*|^2\,dx}{\int_0^L|g_*|^2\,dx}\right)^{1/2}.
+\end{equation}
+Ghi thêm sai lệch biên, residual trên lưới kiểm tra và thời gian. Với FEM, tách thời gian lắp ráp/giải hệ; với PINN, tách thời gian train/dự đoán. Không so trực tiếp hai giá trị loss có định nghĩa khác nhau.
+
+\begin{table}[ht]
+\centering\small
+\caption{Kết quả trên cùng bài toán và lưới kiểm tra. Thay mọi dấu gạch bằng số đo thực.}
+\begin{tabular}{lccccc}
+\toprule
+Phương pháp & Cấu hình & $E_{L^2}(w)$ & $E_{L^2}(m)$ & Biên lớn nhất & Thời gian (s)\\
+\midrule
+FEM Hermite & $n_e=\text{\todo{...}}$ & --- & --- & --- & ---\\
+Mixed PINN & \todo{mạng/steps} & --- & --- & --- & ---\\
+PINN dạng mạnh (nếu chạy) & \todo{mạng/steps} & --- & --- & --- & ---\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]\centering
+\boxfigure{Đồ thị 1: $w(x)$ của nghiệm tham chiếu, FEM và mixed PINN}
+\caption{Chuyển vị trên cùng lưới kiểm tra. Ghi rõ cấu hình và seed.}
+\end{figure}
+\begin{figure}[ht]\centering
+\boxfigure{Đồ thị 2: $m(x)$ và/hoặc sai số theo $x$}
+\caption{Kiểm tra mômen và sai số. Nếu có mặt nối, đánh dấu $x=a$.}
+\end{figure}
+
+\noindent\textbf{Quan sát từ số liệu:} \todo{Nêu tối đa ba nhận xét có dẫn số liệu, ví dụ sai số ở miền và gần biên; không chỉ nói đường cong ``trông giống''.}
+
+\section{Thảo luận, giới hạn và bước tiếp theo}
+\todo{Phân tích vì sao một phương pháp đạt/không đạt; so độ chính xác với chi phí; nói rõ số seed và trường hợp chưa kiểm tra.}
+
+\textbf{Bước tiếp theo nếu có thêm thời gian:} (i) dầm hai đoạn với mặt nối $a=0.4$; (ii) so mixed PINN một mạng/toàn miền với hai mạng và bốn điều kiện ghép; (iii) thay tỷ số $D_2/D_1$; (iv) chạy nhiều seed và báo cáo độ phân tán. Đây là kế hoạch, không ghi như kết quả đã đạt.
+
+\section*{Tài liệu tham khảo}
+\begin{enumerate}
+\item D. Katsikis, A. D. Muradova, G. E. Stavroulakis, ``A Gentle Introduction to Physics-Informed Neural Networks, with Applications in Static Rod and Beam Problems,'' \emph{Journal of Advances in Applied \& Computational Mathematics}, 9, 103--128, 2022. \url{https://doi.org/10.15377/2409-5761.2022.09.8}.
+\item A. D. Mouratidou et al., ``A Mixed Formulation Physics-Informed Neural Network for a Forward and an Inverse Euler--Bernoulli Dynamic Beam Problem,'' \emph{Algorithms}, 19(10), 851, 2026. \url{https://doi.org/10.3390/a19100851}.
+\item Tài liệu dự án: \url{https://nhannguyenminh.github.io/intro2pinns/mixed-pinn-research-guide.html}.
+\end{enumerate}
+\end{document}

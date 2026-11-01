@@ -1,0 +1,155 @@
+% !TeX program = xelatex
+% Mẫu slide 7 ngày: giữ khoảng 6--8 slide, mỗi hình/bảng phải đến từ kết quả thực.
+\documentclass[10pt,aspectratio=169]{beamer}
+\usetheme{Madrid}
+\usecolortheme{seahorse}
+\usepackage{fontspec}
+\IfFontExistsTF{DejaVu Sans}{\setsansfont{DejaVu Sans}}{\setsansfont{Arial}}
+\IfFontExistsTF{DejaVu Serif}{\setmainfont{DejaVu Serif}}{\setmainfont{Times New Roman}}
+\usepackage{amsmath,amssymb,graphicx,booktabs,xcolor}
+\setbeamertemplate{navigation symbols}{}
+\setbeamersize{text margin left=7mm,text margin right=7mm}
+\newcommand{\todo}[1]{{\color{red!70!black}[Điền: #1]}}
+\newcommand{\imagebox}[1]{\fbox{\parbox[c][3.3cm][c]{.92\linewidth}{\centering #1\\\small Thay bằng hình kết quả thực}}}
+\title{So sánh FEM và mixed PINN cho bài toán dầm}
+\subtitle{Kết quả nghiên cứu sau 7 ngày}
+\author{Nguyễn Lin Đa \quad Trà Minh Thiện \quad Võ Trần Tiến}
+\institute{Hướng dẫn: TS. Nguyễn Minh Nhân}
+\date{Tháng 11 năm 2026}
+\begin{document}
+
+\begin{frame}
+  \titlepage
+  \vspace{-4mm}
+  \begin{center}\small Chỉ trình bày các phần nhóm đã thực sự hoàn thành.\end{center}
+\end{frame}
+
+\begin{frame}{1. Câu hỏi và phạm vi trong 7 ngày}
+\begin{block}{Câu hỏi}
+Mixed PINN dự đoán chuyển vị và mômen của dầm chính xác đến đâu so với nghiệm giải tích và FEM Hermite? Chi phí tính toán khác nhau thế nào?
+\end{block}
+\begin{itemize}
+  \item Bắt buộc: dầm Euler--Bernoulli tựa đơn, $L=q_0=EI=1$.
+  \item Nếu đã hoàn thành: dầm hai đoạn với $D_1=1$, $D_2=0.2$, mặt nối $a=0.4$.
+  \item Tiêu chí: sai số chuyển vị, mômen, điều kiện biên và thời gian.
+\end{itemize}
+\small\todo{Ghi một câu về phạm vi thực tế nhóm đã làm.}
+\end{frame}
+
+\begin{frame}{2. Bài toán và nghiệm tham chiếu}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.54\textwidth}
+\begin{align*}
+ (D(x)w'')''&=q_0,\\
+ w(0)=w(L)&=0,\\
+ m(0)=m(L)&=0,\qquad m=Dw''.
+\end{align*}
+Với $L=q_0=D=1$:
+\[w_*(x)=\frac{x^4-2x^3+x}{24},\qquad m_*(x)=\frac{x^2-x}{2}.\]
+\end{column}
+\begin{column}{.43\textwidth}
+\begin{alertblock}{Điều cần kiểm tra}
+Nghiệm tham chiếu thỏa phương trình và bốn điều kiện biên. Nghiệm này chỉ dùng để đánh giá sau khi giải.
+\end{alertblock}
+\small\todo{Nếu làm dầm hai đoạn, nêu $D(x)$ và bốn điều kiện ghép.}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{3. FEM Hermite làm mốc đối chiếu}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.56\textwidth}
+\begin{block}{Từ dạng yếu đến hệ đại số}
+\[\int_0^L Dw_h''v_h''\,dx=\int_0^L q_0v_h\,dx,\qquad
+ \mathbf K\mathbf d=\mathbf f.\]
+\[\mathbf K_e=\int_e D\mathbf B^{\mathsf T}\mathbf B\,dx,\qquad
+ \mathbf f_e=\int_e q_0\mathbf N^{\mathsf T}\,dx.\]
+\end{block}
+\small Hai bậc tự do mỗi nút: $w_i$ và góc xoay $\theta_i$. Cố định $w$ ở hai đầu, để góc xoay tự do.
+\end{column}
+\begin{column}{.41\textwidth}
+\begin{block}{Kiểm tra bắt buộc}
+\begin{itemize}
+\item Lưới $n_e=\todo{...}$.
+\item So với $w_*,m_*$.
+\item Ít nhất hai mức lưới để xem hội tụ.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{4. Mixed PINN: mạng học hai trường}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.54\textwidth}
+\[x\longmapsto\bigl(w_\theta(x),m_\theta(x)\bigr)\]
+\[r_c=m_\theta-Dw_\theta'',\qquad r_e=m_\theta''-q_0.\]
+\[\mathcal L=\lambda_c\operatorname{MSE}(r_c)
+ +\lambda_e\operatorname{MSE}(r_e)+\lambda_b\mathcal L_{\rm biên}.\]
+\small Residual chỉ cần đạo hàm bậc hai. Đây là giả thuyết về khả năng train, không phải bảo đảm mixed PINN tốt hơn.
+\end{column}
+\begin{column}{.43\textwidth}
+\begin{block}{Cấu hình đã dùng}
+\begin{itemize}
+\item Mạng/activation: \todo{...}
+\item Điểm collocation: \todo{...}
+\item Optimizer, bước train: \todo{...}
+\item Trọng số loss và seed: \todo{...}
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{5. Kết quả 1: đường võng và mômen}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{.49\textwidth}\centering\imagebox{Đồ thị $w_*,w_{\rm FEM},w_{\rm PINN}$}\end{column}
+\begin{column}{.49\textwidth}\centering\imagebox{Đồ thị $m_*,m_{\rm FEM},m_{\rm PINN}$}\end{column}
+\end{columns}
+\vspace{2mm}\small\todo{Ghi cấu hình, seed, số điểm vẽ và nơi sai khác lớn nhất.}
+\end{frame}
+
+\begin{frame}{6. Kết quả 2: sai số và chi phí}
+\small
+\begin{table}
+\centering
+\begin{tabular}{lcccc}
+\toprule
+Phương pháp & $E_{L^2}(w)$ & $E_{L^2}(m)$ & Lệch biên lớn nhất & Thời gian (s)\\
+\midrule
+FEM Hermite & --- & --- & --- & ---\\
+Mixed PINN & --- & --- & --- & ---\\
+PINN mạnh (nếu có) & --- & --- & --- & ---\\
+\bottomrule
+\end{tabular}
+\end{table}
+\begin{itemize}
+\item Lưới kiểm tra độc lập: \todo{số điểm}; thời gian FEM gồm \todo{lắp ráp/giải hệ}.
+\item Thời gian PINN gồm \todo{train/dự đoán}; không đồng nhất loss train với sai số nghiệm.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{7. Kết luận có giới hạn và bước tiếp theo}
+\begin{block}{Nhóm đã chứng minh được gì bằng số liệu?}
+\todo{1--2 câu có số: phương pháp nào chính xác hơn ở đại lượng nào, với chi phí nào.}
+\end{block}
+\begin{alertblock}{Chưa thể kết luận gì?}
+\todo{Ví dụ: mới một seed, chưa khảo sát độ cứng gián đoạn hoặc chưa kiểm tra mặt nối.}
+\end{alertblock}
+\begin{itemize}
+\item Tiếp theo: $D(x)$ hai đoạn; kiểm tra $[w]_a,[w']_a,[m]_a,[m']_a$.
+\item So hai mạng theo từng đoạn, thay tỷ số $D_2/D_1$, chạy nhiều seed.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Tài liệu và mã để tái lập}
+\small
+\begin{enumerate}
+\item Katsikis, Muradova, Stavroulakis (2022), \emph{A Gentle Introduction to Physics-Informed Neural Networks...}, DOI: \href{https://doi.org/10.15377/2409-5761.2022.09.8}{10.15377/2409-5761.2022.09.8}.
+\item Mouratidou et al. (2026), \emph{A Mixed Formulation Physics-Informed Neural Network...}, DOI: \href{https://doi.org/10.3390/a19100851}{10.3390/a19100851}.
+\item Mã, seed và dữ liệu kết quả: \todo{đường dẫn repository/thư mục của nhóm}.
+\end{enumerate}
+\vspace{5mm}
+\begin{center}\Large Cảm ơn thầy và các bạn!\end{center}
+\end{frame}
+\end{document}
